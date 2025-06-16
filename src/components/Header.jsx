@@ -4,6 +4,7 @@ import logoImg from "../assets/imgs/Logo.png";
 import sahuruImg from "../assets/imgs/Sahuru.png";
 import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
+import { fadeDown } from "../styles/animation";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -49,6 +50,10 @@ const LoginBtn = styled.button`
   font-size: 14px;
   border: none;
   cursor: pointer;
+  &:hover {
+    transform: scale(1.1);
+  }
+  transition: transform 0.2s ease-in-out;
 `;
 
 const Logo = styled.img`
@@ -71,6 +76,7 @@ const Popup = styled.div`
   position: fixed;
   right: 20px;
   top: 70px;
+  animation: ${fadeDown} 0.3s ease-out;
 `;
 
 const PopupBtn = styled.button`
@@ -82,6 +88,10 @@ const PopupBtn = styled.button`
   height: 50px;
   cursor: pointer;
   border: none;
+  &:hover {
+    transform: scale(1.1);
+  }
+  transition: transform 0.2s ease-in-out;
 `;
 
 const PopupImg = styled.img`
