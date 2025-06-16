@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import logoImg from "../assets/imgs/Logo.png";
 import sahuruImg from "../assets/imgs/Sahuru.png";
+import profileIcon from "../assets/imgs/profileIcon.png";
+import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -11,6 +13,7 @@ const HeaderContainer = styled.header`
   height: 80px;
   border-bottom: 1px solid #d9d9d9;
   background-color: transparent;
+  position: fixed;
 `;
 
 const UserInfoContainer = styled.div`
@@ -54,9 +57,46 @@ const Logo = styled.img`
   margin-left: 30px;
 `;
 
+const Popup = styled.div`
+  width: 150px;
+  height: 120px;
+  border-radius: 14px;
+  background-color: white;
+  box-shadow: 1px 3px 4px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  right: 20px;
+  top: 70px;
+`;
+
+const PopupBtn = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  width: 80%;
+  height: 50px;
+  cursor: pointer;
+  border: none;
+`;
+
+const PopupImg = styled.img`
+  width: ${(props) => props.$width};
+  margin-right: ${(props) => props.$mr};
+`;
+
 const Header = () => {
   const [nickname, setNickname] = useState("dsds");
   const [userImg, setUserImg] = useState("");
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handlePopup = () => {
+    setIsPopupOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     setUserImg(sahuruImg);
@@ -71,11 +111,23 @@ const Header = () => {
           ) : (
             <>
               <HeaderText> {nickname}님, 환영합니다.</HeaderText>
-              <UserImageContainer $image={userImg} />
+              <UserImageContainer $image={userImg} onClick={handlePopup} />
             </>
           )}
         </UserInfoContainer>
       </HeaderContainer>
+      {isPopupOpen ? (
+        <Popup>
+          <PopupBtn>
+            <PopupImg src={profileIcon} $width="20px" $mr="5px" />
+            마이페이지
+          </PopupBtn>
+          <PopupBtn>
+            <PopupImg src={LogoutIcon} $width="15px" $mr="10px" />
+            로그아웃
+          </PopupBtn>
+        </Popup>
+      ) : null}
     </>
   );
 };
