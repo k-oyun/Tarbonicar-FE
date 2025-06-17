@@ -5,13 +5,15 @@ import sahuruImg from "../assets/imgs/Sahuru.png";
 import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 import { fadeDown } from "../styles/animation";
+import { useMediaQuery } from "react-responsive";
 
 const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 80px;
+  /* height: 80px; */
+  height: ${(props) => (props.$ismobile ? "60px" : "80px")};
   border-bottom: 1px solid #d9d9d9;
   background-color: transparent;
   position: fixed;
@@ -23,8 +25,8 @@ const UserInfoContainer = styled.div`
 `;
 
 const UserImageContainer = styled.div`
-  width: 45px;
-  height: 45px;
+  width: ${(props) => (props.$ismobile ? "30px" : "45px")};
+  height: ${(props) => (props.$ismobile ? "30px" : "45px")};
   border-radius: 50%;
   background-color: grey;
   margin-right: 25px;
@@ -37,7 +39,7 @@ const UserImageContainer = styled.div`
 `;
 
 const HeaderText = styled.span`
-  font-size: 14px;
+  font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   color: black;
 `;
 
@@ -47,7 +49,7 @@ const LoginBtn = styled.button`
   background-color: transparent;
   padding: 0px 5px;
   margin-right: 15px;
-  font-size: 14px;
+  font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   border: none;
   cursor: pointer;
   &:hover {
@@ -57,14 +59,13 @@ const LoginBtn = styled.button`
 `;
 
 const Logo = styled.img`
-  width: 100px;
-  height: auto;
+  width: ${(props) => (props.$ismobile ? "60px" : "100px")};
   margin-left: 30px;
 `;
 
 const Popup = styled.div`
-  width: 150px;
-  height: 120px;
+  width: ${(props) => (props.$ismobile ? "130px" : "150px")};
+  height: ${(props) => (props.$ismobile ? "100px" : "120px")};
   border-radius: 14px;
   background-color: white;
   box-shadow: 1px 3px 4px 2px rgba(0, 0, 0, 0.3);
@@ -75,7 +76,7 @@ const Popup = styled.div`
   justify-content: center;
   position: fixed;
   right: 20px;
-  top: 70px;
+  top: ${(props) => (props.$ismobile ? "50px" : "70px")};
   animation: ${fadeDown} 0.3s ease-out;
 `;
 
@@ -103,7 +104,9 @@ const Header = () => {
   const [nickname, setNickname] = useState("dsds");
   const [userImg, setUserImg] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+  const isMobile = useMediaQuery({
+    query: "(max-width:767px)",
+  });
   const handlePopup = () => {
     setIsPopupOpen((prev) => !prev);
   };
@@ -111,23 +114,33 @@ const Header = () => {
   useEffect(() => {
     setUserImg(sahuruImg);
   }, []);
+
+  useEffect(() => {
+    console.log(isMobile);
+  }, [isMobile]);
   return (
     <>
-      <HeaderContainer>
-        <Logo src={logoImg} alt="로고이미지" />
+      <HeaderContainer $ismobile={isMobile}>
+        <Logo src={logoImg} alt="로고이미지" $ismobile={isMobile} />
         <UserInfoContainer>
           {nickname === "" ? (
-            <LoginBtn>로그인하러 가기</LoginBtn>
+            <LoginBtn $ismobile={isMobile}>로그인하러 가기</LoginBtn>
           ) : (
             <>
-              <HeaderText> {nickname}님, 환영합니다.</HeaderText>
-              <UserImageContainer $image={userImg} onClick={handlePopup} />
+              <HeaderText $ismobile={isMobile}>
+                {nickname}님, 환영합니다.
+              </HeaderText>
+              <UserImageContainer
+                $ismobile={isMobile}
+                $image={userImg}
+                onClick={handlePopup}
+              />
             </>
           )}
         </UserInfoContainer>
       </HeaderContainer>
       {isPopupOpen ? (
-        <Popup>
+        <Popup $ismobile={isMobile}>
           <PopupBtn>
             <PopupImg src={profileIcon} $width="20px" $mr="5px" />
             마이페이지
