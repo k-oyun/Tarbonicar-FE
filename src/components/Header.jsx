@@ -21,6 +21,7 @@ const HeaderContainer = styled.header`
 const UserInfoContainer = styled.div`
   display: flex;
   align-items: center;
+  overflow: hidden;
 `;
 
 const UserImageContainer = styled.div`
