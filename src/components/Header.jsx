@@ -12,7 +12,6 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  /* height: 80px; */
   height: ${(props) => (props.$ismobile ? "60px" : "80px")};
   border-bottom: 1px solid #d9d9d9;
   background-color: transparent;

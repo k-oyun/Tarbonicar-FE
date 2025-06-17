@@ -4,10 +4,10 @@ import Header from "./components/header";
 
 function App() {
   return (
-    <Header />
-    // <BrowserRouter>
-    //   <Route></Route>
-    // </BrowserRouter>
+    // <Header />
+    <BrowserRouter>
+      <Route></Route>
+    </BrowserRouter>
   );
 }
 
