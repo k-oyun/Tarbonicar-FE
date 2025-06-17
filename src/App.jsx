@@ -1,16 +1,16 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Header from "./components/header";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Header from "./components/Header.jsx";
 import ModalSample from "./pages/ModalSample.jsx";
 
 function App() {
-  return (
-    // <Header />
-    // <ModalSample/>
-    <BrowserRouter>
-      <Route></Route>
-    </BrowserRouter>
-  );
+    return (
+        // <Header />
+        // <ModalSample/>
+         <BrowserRouter>
+           <Route></Route>
+         </BrowserRouter>
+    );
 }
 
 export default App;
