@@ -1,11 +1,13 @@
 import "./App.css";
-import { BrowserRouter, Route } from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import ModalSample from "./pages/ModalSample.jsx";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Route></Route>
-    </BrowserRouter>
+      <ModalSample/>
+      // <BrowserRouter>
+      //   <Route></Route>
+      // </BrowserRouter>
   );
 }
 
