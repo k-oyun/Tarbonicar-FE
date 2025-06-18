@@ -78,8 +78,6 @@ const CardGrid = styled.div`
     }
 `;
 
-
-
 const BoardList = () => {
     const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
     const navigate = useNavigate();

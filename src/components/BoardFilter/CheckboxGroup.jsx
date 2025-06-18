@@ -46,10 +46,7 @@ const CheckboxGroup = ({ list, selected, setSelected, singleSelect = false, vert
     return (
         <Wrapper vertical={vertical}>
             {list.map((item, i) => (
-                <StyledLabel
-                    key={i}
-                    checked={selected.includes(item)}
-                >
+                <StyledLabel key={i} checked={selected.includes(item)}>
                     <HiddenCheckbox
                         checked={selected.includes(item)}
                         onChange={() => toggle(item)}
