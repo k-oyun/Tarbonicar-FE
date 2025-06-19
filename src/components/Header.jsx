@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import logoImg from "../assets/imgs/Logo.png";
+import logoImgDark from "../assets/imgs/logoDark.png";
+import logoImgWhite from "../assets/imgs/logoWhite.png";
 import sahuruImg from "../assets/imgs/Sahuru.png";
 import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
@@ -13,14 +14,24 @@ const HeaderContainer = styled.header`
   align-items: center;
   width: 100%;
   height: ${(props) => (props.$ismobile ? "60px" : "80px")};
-  border-bottom: 1px solid #d9d9d9;
-  background-color: transparent;
+  border-bottom: ${(props) =>
+    props.$isReviewVisible ? "1px solid #d9d9d9" : "none"};
+  background-color: ${(props) =>
+    props.$isReviewVisible
+      ? "rgba(255, 255, 255, 0.95)"
+      : "rgba(0, 0, 0, 0.3)"};
+  color: ${(props) => (props.$isReviewVisible ? "#002c5f" : "white")};
+  backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease, border-bottom 0.3s ease;
   position: fixed;
+  top: 0;
+  z-index: 100;
 `;
 
 const UserInfoContainer = styled.div`
   display: flex;
   align-items: center;
+  overflow: hidden;
 `;
 
 const UserImageContainer = styled.div`
@@ -39,7 +50,7 @@ const UserImageContainer = styled.div`
 
 const HeaderText = styled.span`
   font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
-  color: black;
+  color: ${(props) => (props.$isReviewVisible ? "black" : "white")};
 `;
 
 const LoginBtn = styled.button`
@@ -50,6 +61,7 @@ const LoginBtn = styled.button`
   margin-right: 15px;
   font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   border: none;
+  color: ${(props) => (props.$isReviewVisible ? "black" : "white")};
   cursor: pointer;
   &:hover {
     transform: scale(1.1);
@@ -75,6 +87,7 @@ const Popup = styled.div`
   justify-content: center;
   position: fixed;
   right: 20px;
+  z-index: 100;
   top: ${(props) => (props.$ismobile ? "50px" : "70px")};
   animation: ${fadeDown} 0.3s ease-out;
 `;
@@ -99,7 +112,7 @@ const PopupImg = styled.img`
   margin-right: ${(props) => props.$mr};
 `;
 
-const Header = () => {
+const Header = ({ isReviewVisible }) => {
   const [nickname, setNickname] = useState("dsds");
   const [userImg, setUserImg] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -119,14 +132,24 @@ const Header = () => {
   }, [isMobile]);
   return (
     <>
-      <HeaderContainer $ismobile={isMobile}>
-        <Logo src={logoImg} alt="로고이미지" $ismobile={isMobile} />
+      <HeaderContainer $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+        {isReviewVisible ? (
+          <Logo src={logoImgDark} alt="로고이미지" $ismobile={isMobile} />
+        ) : (
+          <Logo src={logoImgWhite} alt="로고이미지" $ismobile={isMobile} />
+        )}
+
         <UserInfoContainer>
           {nickname === "" ? (
-            <LoginBtn $ismobile={isMobile}>로그인하러 가기</LoginBtn>
+            <LoginBtn $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+              로그인하러 가기
+            </LoginBtn>
           ) : (
             <>
-              <HeaderText $ismobile={isMobile}>
+              <HeaderText
+                $ismobile={isMobile}
+                $isReviewVisible={isReviewVisible}
+              >
                 {nickname}님, 환영합니다.
               </HeaderText>
               <UserImageContainer

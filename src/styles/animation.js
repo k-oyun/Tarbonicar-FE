@@ -10,3 +10,24 @@ export const fadeDown = keyframes`
     transform: translateY(0);
   }
 `;
+
+export const moveDown = keyframes`
+  from {
+    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+`;
+
+export const floatUpDown = keyframes`
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+`;
