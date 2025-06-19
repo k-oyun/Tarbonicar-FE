@@ -5,7 +5,7 @@ import Car from "../assets/imgs/car.png";
 import { floatUpDown, fadeDown } from "../styles/animation";
 import { useEffect, useRef, useState } from "react";
 import SelectBox from "../components/SelectBox";
-import Header from "../components/header";
+import Header from "../components/Header";
 import { useMediaQuery } from "react-responsive";
 
 const MainContainer = styled.div`
@@ -75,7 +75,7 @@ const SubText = styled.span`
 `;
 
 const DescContainer = styled.div`
-  display: flex;
+  display: ${(props) => (props.$isBtnPressed ? "none" : "flex")};
   justify-content: center;
   align-items: center;
   width: ${(props) => (props.$ismobile ? "330px" : "470px")};
@@ -201,7 +201,7 @@ const Main = () => {
               현대자통차에 특화된 프리미엄 차량 커뮤니티 플랫폼
             </SubText>
           </TextContainer>
-          <DescContainer $ismobile={isMobile}>
+          <DescContainer $ismobile={isMobile} $isBtnPressed={isBtnPressed}>
             실제 운전자들의 시승 후기, 차량 리뷰, 차량 팁 등 신뢰도 높은 정보를
             <br /> 한곳에서 확인하고, 나와 잘 맞는 차량을 찾는 데 도움을
             받아보세요
