@@ -61,6 +61,7 @@ const LoginBtn = styled.button`
   margin-right: 15px;
   font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   border: none;
+  color: ${(props) => (props.$isReviewVisible ? "black" : "white")};
   cursor: pointer;
   &:hover {
     transform: scale(1.1);
@@ -140,7 +141,9 @@ const Header = ({ isReviewVisible }) => {
 
         <UserInfoContainer>
           {nickname === "" ? (
-            <LoginBtn $ismobile={isMobile}>로그인하러 가기</LoginBtn>
+            <LoginBtn $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+              로그인하러 가기
+            </LoginBtn>
           ) : (
             <>
               <HeaderText

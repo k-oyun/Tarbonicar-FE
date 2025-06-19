@@ -6,6 +6,7 @@ import { floatUpDown, fadeDown } from "../styles/animation";
 import { useEffect, useRef, useState } from "react";
 import SelectBox from "../components/SelectBox";
 import Header from "../components/header";
+import { useMediaQuery } from "react-responsive";
 
 const MainContainer = styled.div`
   width: 100%;
@@ -51,24 +52,24 @@ const ReviewContainer = styled.div`
 `;
 
 const CarImg = styled.img`
-  width: 700px;
+  width: ${(props) => (props.$ismobile ? "350px" : "700px")};
 `;
 
 const TextContainer = styled.div`
   display: flex;
   justify-content: flex-start;
-  width: 570px;
+  width: ${(props) => (props.$ismobile ? "310px" : "570px")};
   margin-top: ${(props) => props.$mt};
 `;
 
 const LogoText = styled.span`
-  font-size: 40px;
+  font-size: ${(props) => (props.$ismobile ? "30px" : "40px")};
   color: #002c5f;
   font-weight: 900;
 `;
 
 const SubText = styled.span`
-  font-size: 28px;
+  font-size: ${(props) => (props.$ismobile ? "15px" : "28px")};
   color: #002c5f;
   font-weight: 800;
 `;
@@ -77,13 +78,13 @@ const DescContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 470px;
+  width: ${(props) => (props.$ismobile ? "330px" : "470px")};
   height: 80px;
-  font-size: 16px;
+  font-size: ${(props) => (props.$ismobile ? "12px" : "16px")};
   color: #002c5f;
   font-weight: 400;
-  margin-top: 30px;
-  line-height: 32px;
+  margin-top: ${(props) => (props.$ismobile ? "15px" : "30px")};
+  line-height: ${(props) => (props.$ismobile ? "25px" : "32px")};
 `;
 
 const SelectBoxContainer = styled.div`
@@ -116,6 +117,9 @@ const Main = () => {
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [isReviewVisible, setIsReviewVisible] = useState(false);
+  const isMobile = useMediaQuery({
+    query: "(max-width:767px)",
+  });
   const carType = [
     { label: "전체보기", value: "all" },
     { label: "승용차", value: "sedan" },
@@ -188,14 +192,16 @@ const Main = () => {
           <DownArrowIcon src={downArrow} onClick={handleDownBtn} />
         </VideoContainer>
         <ReviewContainer ref={reviewRef}>
-          <CarImg src={Car} />
-          <TextContainer $mt="30px">
-            <LogoText>타보니까</LogoText>
+          <CarImg src={Car} $ismobile={isMobile} />
+          <TextContainer $mt="30px" $ismobile={isMobile}>
+            <LogoText $ismobile={isMobile}>타보니까</LogoText>
           </TextContainer>
-          <TextContainer $mt="15px">
-            <SubText>현대자통차에 특화된 프리미엄 차량 커뮤니티 플랫폼</SubText>
+          <TextContainer $mt="15px" $ismobile={isMobile}>
+            <SubText $ismobile={isMobile}>
+              현대자통차에 특화된 프리미엄 차량 커뮤니티 플랫폼
+            </SubText>
           </TextContainer>
-          <DescContainer>
+          <DescContainer $ismobile={isMobile}>
             실제 운전자들의 시승 후기, 차량 리뷰, 차량 팁 등 신뢰도 높은 정보를
             <br /> 한곳에서 확인하고, 나와 잘 맞는 차량을 찾는 데 도움을
             받아보세요
