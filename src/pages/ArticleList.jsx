@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import BoardFilter from "../components/BoardFilter/BoardFilter.jsx";
+import ArticleFilter from "../components/ArticleFilter/ArticleFilter.jsx";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
-import BoardItem from "../components/BoardItem.jsx";
+import ArticleListItem from "../components/ArticleListItem.jsx";
 
 // 전체 컨텐츠 영역
 const Content = styled.div`
@@ -78,7 +78,7 @@ const CardGrid = styled.div`
     }
 `;
 
-const BoardList = () => {
+const ArticleList = () => {
     const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
     const navigate = useNavigate();
 
@@ -92,7 +92,7 @@ const BoardList = () => {
                 <Layout>
                     {/* 왼쪽 (또는 위쪽) 필터 */}
                     <FilterArea>
-                        <BoardFilter />
+                        <ArticleFilter />
                     </FilterArea>
 
                     {/* 오른쪽 (또는 아래쪽) 콘텐츠 */}
@@ -102,7 +102,7 @@ const BoardList = () => {
                         </TopBar>
                         <CardGrid>
                             {Array.from({ length: 10 })
-                                .map((_, i) => (<BoardItem key={i} />))}
+                                .map((_, i) => (<ArticleListItem key={i} />))}
                         </CardGrid>
                     </ContentArea>
                 </Layout>
@@ -111,4 +111,4 @@ const BoardList = () => {
     );
 };
 
-export default BoardList;
+export default ArticleList;

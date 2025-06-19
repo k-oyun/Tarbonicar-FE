@@ -153,7 +153,7 @@ const CustomContent = forwardRef(({children, ...props}, ref) => (
     </AccordionContent>
 ));
 
-const BoardFilter = () => {
+const ArticleFilter = () => {
     const [openItems, setOpenItems] = useState(["cartype", "category"]);
 
     const [carTypeList, setCarTypeList] = useState([]);
@@ -297,4 +297,4 @@ const BoardFilter = () => {
     );
 };
 
-export default BoardFilter;
+export default ArticleFilter;

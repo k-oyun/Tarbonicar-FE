@@ -66,7 +66,7 @@ const IconGroup = styled.div`
     gap: 8px;
 `;
 
-const BoardItem = () => {
+const ArticleListItem = () => {
     const navigate = useNavigate();
 
     const handleClick = () => {
@@ -91,4 +91,4 @@ const BoardItem = () => {
     );
 };
 
-export default BoardItem;
+export default ArticleListItem;
