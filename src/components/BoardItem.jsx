@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import Sahuru from "../assets/imgs/Sahuru.png";
 import like from "../assets/Svgs/like.svg";
 import unlike from "../assets/Svgs/unlike.svg";
@@ -66,8 +67,14 @@ const IconGroup = styled.div`
 `;
 
 const BoardItem = () => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate("../article-view");
+    }
+
     return (
-        <Card>
+        <Card onClick={handleClick}>
             <Image src={Sahuru} alt="차량 이미지" />
             <Content>
                 <Title>아주 만족스러운 경험</Title>
