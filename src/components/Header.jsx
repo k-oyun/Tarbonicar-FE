@@ -25,7 +25,7 @@ const HeaderContainer = styled.header`
   transition: background-color 0.3s ease, border-bottom 0.3s ease;
   position: fixed;
   top: 0;
-  z-index: 100;
+  z-index: 3000;
 `;
 
 const UserInfoContainer = styled.div`
@@ -87,7 +87,7 @@ const Popup = styled.div`
   justify-content: center;
   position: fixed;
   right: 20px;
-  z-index: 100;
+  z-index: 3000;
   top: ${(props) => (props.$ismobile ? "50px" : "70px")};
   animation: ${fadeDown} 0.3s ease-out;
 `;
