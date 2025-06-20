@@ -1,11 +1,10 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useRef, useState} from "react";
 import { categoryApi } from "../../api/CategoryApi.js";
 import * as Accordion from "@radix-ui/react-accordion";
 import {ChevronDownIcon} from "@radix-ui/react-icons";
 import styled, {keyframes} from "styled-components";
 import refresh from "../../assets/Svgs/refresh.svg";
 import CheckboxGroup from "./CheckboxGroup.jsx";
-import SelectBox from "../SelectBox.jsx";
 import {DropdownBox} from "../DropdownBox.jsx";
 
 const FilterContainer = styled.div`
@@ -142,6 +141,17 @@ const AccordionChevron = styled(ChevronDownIcon)`
     transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
 `;
 
+const YearDropdownRow = styled.div`
+    display: flex;
+    gap: 10px;
+    width: 100%;
+`;
+
+const StyledDropdownBox = styled(DropdownBox)`
+    flex: 1;
+    min-width: 0;
+`;
+
 const CustomTrigger = forwardRef(({children, ...props}, ref) => (
     <AccordionHeader>
         <AccordionTrigger {...props} ref={ref}>
@@ -157,16 +167,11 @@ const CustomContent = forwardRef(({children, ...props}, ref) => (
     </AccordionContent>
 ));
 
-const YearDropdownRow = styled.div`
-    display: flex;
-    gap: 10px;
-    width: 100%;
-`;
-
-const StyledDropdownBox = styled(DropdownBox)`
-    flex: 1;
-    min-width: 0;
-`;
+const CATEGORY_OPTIONS = [
+    { label: "시승 후기", value: "TESTDRIVE" },
+    { label: "차량 리뷰", value: "REVIEW" },
+    { label: "차량 팁", value: "TIP" }
+];
 
 const ArticleFilter = ({ filters, setFilters }) => {
     const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
@@ -179,41 +184,33 @@ const ArticleFilter = ({ filters, setFilters }) => {
     const [startYear, setStartYear] = useState("");
     const [endYear, setEndYear] = useState("");
 
-    /*const yearOptions = [
-        { label: "전체(선택 안함)", value: "" },
-        ...carAgeList.map(y => ({
-            label: `${y.carAge}년`,
-            value: String(y.carAge),
-        })),
-    ];*/
+    // 최초 진입 플래그
+    const isInit = useRef(true);
 
-    const CATEGORY_OPTIONS = [
-        { label: "시승 후기", value: "TESTDRIVE" },
-        { label: "차량 리뷰", value: "REVIEW" },
-        { label: "차량 팁", value: "TIP" }
-    ];
-    console.log('filters', filters);
-
+    // 차종 목록 패치 (최초)
     useEffect(() => {
         carTypeListApi()
             .then(res => setCarTypeList(res.data.data || []))
             .catch(console.error);
     }, []);
 
-    // 차종 선택 시 → 차량/연식 초기화
+    // 차종 선택(혹은 초기 mount) 시 차량, 연식 fetch
     useEffect(() => {
         if (filters.carType) {
             carNameListApi(filters.carType)
                 .then(res => setCarNameList(res.data.data || []))
                 .catch(console.error);
 
-            setFilters(prev => ({
-                ...prev,
-                carNames: [],
-                carAges: [],
-            }));
-            setStartYear("");
-            setEndYear("");
+            // 최초 진입(초기값 주입 시)에는 초기화하지 않음
+            if (!isInit.current) {
+                setFilters(prev => ({
+                    ...prev,
+                    carNames: [],
+                    carAges: [],
+                }));
+                setStartYear("");
+                setEndYear("");
+            }
 
             setOpenItems(prev => [...new Set([...prev, "carname"])]);
         } else {
@@ -227,24 +224,58 @@ const ArticleFilter = ({ filters, setFilters }) => {
             setStartYear("");
             setEndYear("");
         }
+        // eslint-disable-next-line
     }, [filters.carType, setFilters]);
 
-    // 차량 선택 시 → 연식 초기화
+    // 차량 선택(혹은 초기 mount) 시 연식 fetch
     useEffect(() => {
-        const carTypeParam = filters.carType || "all";
-        const carNameParam = filters.carNames[0] || "all";
+        if (filters.carType && filters.carNames.length > 0) {
+            const carTypeParam = filters.carType;
+            const carNameParam = filters.carNames[0];
+            carAgeListApi(carTypeParam, carNameParam)
+                .then(res => setCarAgeList(res.data.data || []))
+                .catch(console.error);
 
-        carAgeListApi(carTypeParam, carNameParam)
-            .then(res => setCarAgeList(res.data.data || []))
-            .catch(console.error);
-
-        setFilters(prev => ({
-            ...prev,
-            carAges: [],
-        }));
-        setStartYear("");
-        setEndYear("");
+            // 최초 진입 아닐 때만 초기화
+            if (!isInit.current) {
+                setFilters(prev => ({
+                    ...prev,
+                    carAges: [],
+                }));
+                setStartYear("");
+                setEndYear("");
+            }
+        } else {
+            setCarAgeList([]);
+            setFilters(prev => ({
+                ...prev,
+                carAges: [],
+            }));
+            setStartYear("");
+            setEndYear("");
+        }
+        // eslint-disable-next-line
     }, [filters.carType, filters.carNames, setFilters]);
+
+    // ArticleFilter 컴포넌트 내부에 추가
+    useEffect(() => {
+        // carAgeList가 로드되고, filters.carAges에 값이 하나 있을 때만 초기화
+        if (
+            carAgeList.length > 0 &&
+            filters.carAges &&
+            filters.carAges.length === 1 &&
+            startYear === "" && endYear === ""
+        ) {
+            const initYear = String(filters.carAges[0]);
+            setStartYear(initYear);
+            setEndYear(initYear);
+        }
+    }, [carAgeList, filters.carAges, startYear, endYear]);
+
+    // 최초 마운트 후에는 플래그 false
+    useEffect(() => {
+        isInit.current = false;
+    }, []);
 
     // 드롭다운 onChange
     const handleStartYearChange = e => {
@@ -301,7 +332,7 @@ const ArticleFilter = ({ filters, setFilters }) => {
         }
     };
 
-
+    // 드롭다운 onChange
     const handleEndYearChange = e => {
         const newEnd = typeof e === "string" ? e : e.target.value;
         // 전체(선택안함)이면 전체 범위

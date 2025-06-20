@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { articleApi } from "../api/ArticleApi.js";
 import ArticleFilter from "../components/ArticleFilter/ArticleFilter.jsx";
 import styled from "styled-components";
@@ -27,6 +27,7 @@ const Layout = styled.div`
     }
 `;
 
+// 필터 영역
 const FilterArea = styled.div`
     width: 320px;
     margin-top: 30px;
@@ -78,20 +79,28 @@ const CardGrid = styled.div`
     cursor: pointer;
     
     @media (max-width: 767px) {
-        width: 100%;
+        width: auto;
     }
 `;
 
 const ArticleList = () => {
     const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
     const navigate = useNavigate();
+    const location = useLocation();
     const [articleList, setArticleList] = useState([]);
+    console.log('이전화면에서 전달된 state:', location.state);
+
+    const norm = val => !val || val === "all" ? "" : val;
+    const arrNorm = val => !val || val === "all" ? [] : [val];
+    const arrNumNorm = val => !val || val === "all" ? [] : [Number(val)];
+
+    const filterInfo = location.state || {};
 
     // 필터값 상태
     const [filters, setFilters] = useState({
-        carType: "",
-        carNames: [],
-        carAges: [],
+        carType: norm(filterInfo.type),
+        carNames: arrNorm(filterInfo.name),
+        carAges: arrNumNorm(filterInfo.year),
         articleTypes: [],
         sortType: "RECENT"
     });
