@@ -1,10 +1,12 @@
 import React, {forwardRef, useEffect, useState} from "react";
-import axios from "axios";
+import { categoryApi } from "../../api/CategoryApi.js";
 import * as Accordion from "@radix-ui/react-accordion";
 import {ChevronDownIcon} from "@radix-ui/react-icons";
 import styled, {keyframes} from "styled-components";
 import refresh from "../../assets/Svgs/refresh.svg";
 import CheckboxGroup from "./CheckboxGroup.jsx";
+import SelectBox from "../SelectBox.jsx";
+import {DropdownBox} from "../DropdownBox.jsx";
 
 const FilterContainer = styled.div`
     display: flex;
@@ -118,6 +120,8 @@ const AccordionContent = styled(Accordion.Content)`
     overflow: hidden;
     font-size: 15px;
     color: #444444;
+    display: flex;
+    flex-direction: column;
     background-color: white;
 
     &[data-state="open"] {
@@ -153,73 +157,213 @@ const CustomContent = forwardRef(({children, ...props}, ref) => (
     </AccordionContent>
 ));
 
-const ArticleFilter = () => {
-    const [openItems, setOpenItems] = useState(["cartype", "category"]);
+const YearDropdownRow = styled.div`
+    display: flex;
+    gap: 10px;
+    width: 100%;
+`;
+
+const StyledDropdownBox = styled(DropdownBox)`
+    flex: 1;
+    min-width: 0;
+`;
+
+const ArticleFilter = ({ filters, setFilters }) => {
+    const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
+    const [openItems, setOpenItems] = useState(["cartype", "carname", "carage", "category"]);
 
     const [carTypeList, setCarTypeList] = useState([]);
     const [carNameList, setCarNameList] = useState([]);
     const [carAgeList, setCarAgeList] = useState([]);
 
-    const [selectedCarTypes, setSelectedCarTypes] = useState([]);
-    const [selectedCarNames, setSelectedCarNames] = useState([]);
-    const [selectedCarAges, setSelectedCarAges] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [startYear, setStartYear] = useState("");
+    const [endYear, setEndYear] = useState("");
+
+    /*const yearOptions = [
+        { label: "전체(선택 안함)", value: "" },
+        ...carAgeList.map(y => ({
+            label: `${y.carAge}년`,
+            value: String(y.carAge),
+        })),
+    ];*/
+
+    const CATEGORY_OPTIONS = [
+        { label: "시승 후기", value: "TESTDRIVE" },
+        { label: "차량 리뷰", value: "REVIEW" },
+        { label: "차량 팁", value: "TIP" }
+    ];
+    console.log('filters', filters);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/api/v1/category/search/cartype")
+        carTypeListApi()
             .then(res => setCarTypeList(res.data.data || []))
             .catch(console.error);
     }, []);
 
     // 차종 선택 시 → 차량/연식 초기화
     useEffect(() => {
-        if (selectedCarTypes.length === 1) {
-            axios
-                .get(`http://localhost:8080/api/v1/category/search/carname?carType=${selectedCarTypes[0]}`)
-                .then((res) => setCarNameList(res.data.data || []))
+        if (filters.carType) {
+            carNameListApi(filters.carType)
+                .then(res => setCarNameList(res.data.data || []))
                 .catch(console.error);
 
-            // ✅ 차량, 연식 초기화
-            setSelectedCarNames([]);
-            setSelectedCarAges([]);
+            setFilters(prev => ({
+                ...prev,
+                carNames: [],
+                carAges: [],
+            }));
+            setStartYear("");
+            setEndYear("");
 
-            // 차량 아코디언 열기
             setOpenItems(prev => [...new Set([...prev, "carname"])]);
         } else {
             setCarNameList([]);
             setCarAgeList([]);
-            setSelectedCarNames([]);
-            setSelectedCarAges([]);
+            setFilters(prev => ({
+                ...prev,
+                carNames: [],
+                carAges: [],
+            }));
+            setStartYear("");
+            setEndYear("");
         }
-    }, [selectedCarTypes]);
+    }, [filters.carType, setFilters]);
 
-// 차량 선택 시 → 연식 초기화
+    // 차량 선택 시 → 연식 초기화
     useEffect(() => {
-        if (selectedCarNames.length === 1) {
-            axios
-                .get(`http://localhost:8080/api/v1/category/search/carage?carName=${selectedCarNames[0]}`)
-                .then((res) => setCarAgeList(res.data.data || []))
-                .catch(console.error);
+        const carTypeParam = filters.carType || "all";
+        const carNameParam = filters.carNames[0] || "all";
 
-            // ✅ 연식 초기화
-            setSelectedCarAges([]);
+        carAgeListApi(carTypeParam, carNameParam)
+            .then(res => setCarAgeList(res.data.data || []))
+            .catch(console.error);
 
-            // 연식 아코디언 열기
-            setOpenItems(prev => [...new Set([...prev, "carage"])]);
-        } else {
-            setCarAgeList([]);
-            setSelectedCarAges([]);
+        setFilters(prev => ({
+            ...prev,
+            carAges: [],
+        }));
+        setStartYear("");
+        setEndYear("");
+    }, [filters.carType, filters.carNames, setFilters]);
+
+    // 드롭다운 onChange
+    const handleStartYearChange = e => {
+        const newStart = typeof e === "string" ? e : e.target.value;
+        // 전체(선택안함)이면 전체 범위
+        if (!newStart && !endYear) {
+            setStartYear("");
+            setFilters(prev => ({ ...prev, carAges: [] }));
+            return;
         }
-    }, [selectedCarNames]);
+        if (!newStart && endYear) {
+            // 시작 전체, 종료만 선택 → oldest ~ 종료
+            const oldest = carAgeList[carAgeList.length - 1]?.carAge;
+            setStartYear("");
+            if (oldest !== undefined) {
+                const to = Number(endYear);
+                const from = Math.min(Number(oldest), to);
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+            return;
+        }
 
-    const handleReset = () => {
-        setSelectedCarTypes([]);
-        setSelectedCarNames([]);
-        setSelectedCarAges([]);
-        setSelectedCategories([]);
+        // newStart만 있는 경우: 최신까지
+        if (newStart && !endYear) {
+            setStartYear(newStart);
+            setEndYear("");
+            const newest = carAgeList[0]?.carAge;
+            if (newest !== undefined) {
+                const from = Number(newStart);
+                const to = Math.max(Number(newStart), Number(newest));
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+            return;
+        }
+
+        // newStart와 endYear 모두 선택됨
+        if (newStart && endYear) {
+            let from = Number(newStart);
+            let to = Number(endYear);
+
+            if (from > to) {
+                // 시작 > 종료: 종료도 시작으로 맞춤
+                setStartYear(newStart);
+                setEndYear(newStart);
+                setFilters(prev => ({ ...prev, carAges: [from] }));
+            } else {
+                setStartYear(newStart);
+                // 정상 범위
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+        }
     };
 
-    const CATEGORIES = ["시승 후기", "차량 리뷰", "차량 팁"];
+
+    const handleEndYearChange = e => {
+        const newEnd = typeof e === "string" ? e : e.target.value;
+        // 전체(선택안함)이면 전체 범위
+        if (!startYear && !newEnd) {
+            setEndYear("");
+            setFilters(prev => ({ ...prev, carAges: [] }));
+            return;
+        }
+        if (!startYear && newEnd) {
+            // 시작 전체, 종료만 선택 → oldest ~ 종료
+            const oldest = carAgeList[carAgeList.length - 1]?.carAge;
+            setEndYear(newEnd);
+            if (oldest !== undefined) {
+                const to = Number(newEnd);
+                const from = Math.min(Number(oldest), to);
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+            return;
+        }
+        if (startYear && !newEnd) {
+            // 종료 전체 → 시작 ~ 최신
+            setEndYear("");
+            const newest = carAgeList[0]?.carAge;
+            if (newest !== undefined) {
+                const from = Number(startYear);
+                const to = Math.max(Number(startYear), Number(newest));
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+            return;
+        }
+        if (startYear && newEnd) {
+            let from = Number(startYear);
+            let to = Number(newEnd);
+
+            if (to < from) {
+                // 종료 < 시작: 시작도 종료로 맞춤
+                setStartYear(newEnd);
+                setEndYear(newEnd);
+                setFilters(prev => ({ ...prev, carAges: [to] }));
+            } else {
+                setEndYear(newEnd);
+                // 정상 범위
+                const range = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+                setFilters(prev => ({ ...prev, carAges: range }));
+            }
+        }
+    };
+
+    // 초기화 시 드롭다운도 초기화
+    const handleReset = () => {
+        setFilters({
+            carType: "",
+            carNames: [],
+            carAges: [],
+            articleTypes: [],
+            sortType: "RECENT"
+        });
+        setStartYear("");
+        setEndYear("");
+    };
 
     return (
         <div>
@@ -238,8 +382,13 @@ const ArticleFilter = () => {
                         {carTypeList.length > 0 ? (
                             <CheckboxGroup
                                 list={carTypeList.map(i => i.carType)}
-                                selected={selectedCarTypes}
-                                setSelected={setSelectedCarTypes}
+                                selected={filters.carType ? [filters.carType] : []}
+                                setSelected={arr => {
+                                    setFilters(prev => ({
+                                        ...prev,
+                                        carType: arr[0] || "",
+                                    }));
+                                }}
                                 singleSelect={true}
                             />
                         ) : (
@@ -254,8 +403,11 @@ const ArticleFilter = () => {
                         {carNameList.length > 0 ? (
                             <CheckboxGroup
                                 list={carNameList.map(i => i.carName)}
-                                selected={selectedCarNames}
-                                setSelected={setSelectedCarNames}
+                                selected={filters.carNames}
+                                setSelected={arr => setFilters(prev => ({
+                                    ...prev,
+                                    carNames: arr,
+                                }))}
                                 vertical={true}
                             />
                         ) : (
@@ -268,13 +420,33 @@ const ArticleFilter = () => {
                     <CustomTrigger>연식</CustomTrigger>
                     <CustomContent>
                         {carAgeList.length > 0 ? (
-                            <CheckboxGroup
-                                list={carAgeList.map(i => `${i.carAge}년`)}
-                                selected={selectedCarAges}
-                                setSelected={setSelectedCarAges}
-                            />
+                            <YearDropdownRow>
+                                <StyledDropdownBox
+                                    options={[
+                                        { label: "선택 안함", value: "" },
+                                        ...carAgeList.map(y => ({
+                                            label: `${y.carAge}년`,
+                                            value: String(y.carAge)
+                                        })),
+                                    ]}
+                                    value={startYear}
+                                    onChange={handleStartYearChange}
+                                />
+                                <div style={{alignSelf: "center"}}>~</div>
+                                <StyledDropdownBox
+                                    options={[
+                                        { label: "선택 안함", value: "" },
+                                        ...carAgeList.map(y => ({
+                                            label: `${y.carAge}년`,
+                                            value: String(y.carAge)
+                                        })),
+                                    ]}
+                                    value={endYear}
+                                    onChange={handleEndYearChange}
+                                />
+                            </YearDropdownRow>
                         ) : (
-                            <div>차량을 선택하세요.</div>
+                            <div>차종/차량을 선택하세요.</div>
                         )}
                     </CustomContent>
                 </AccordionItem>
@@ -283,9 +455,12 @@ const ArticleFilter = () => {
                     <CustomTrigger>카테고리</CustomTrigger>
                     <CustomContent>
                         <CheckboxGroup
-                            list={CATEGORIES}
-                            selected={selectedCategories}
-                            setSelected={setSelectedCategories}
+                            list={CATEGORY_OPTIONS}
+                            selected={filters.articleTypes}
+                            setSelected={arr => setFilters(prev => ({
+                                ...prev,
+                                articleTypes: arr
+                            }))}
                             vertical={true}
                         />
                     </CustomContent>

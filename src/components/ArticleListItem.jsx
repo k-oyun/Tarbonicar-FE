@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { timeForToday } from "../utils/timeForToday.js";
 import Sahuru from "../assets/imgs/Sahuru.png";
 import like from "../assets/Svgs/like.svg";
 import unlike from "../assets/Svgs/unlike.svg";
@@ -66,24 +67,24 @@ const IconGroup = styled.div`
     gap: 8px;
 `;
 
-const ArticleListItem = () => {
+const ArticleListItem = ({article}) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate("../article-view");
+        navigate(`../article-view`, { state: `${article.id}` });
     }
 
     return (
         <Card onClick={handleClick}>
-            <Image src={Sahuru} alt="차량 이미지" />
+            <Image src={article.imageUrl || Sahuru} alt="차량 이미지" />
             <Content>
-                <Title>아주 만족스러운 경험</Title>
-                <Text>차가 정말 뚱뚱뚱뚱뚱했습니다. 어쩌구 저쩌구...차가 정말 뚱뚱뚱뚱뚱했습니다. 어쩌구 저쩌구...차가 정말 뚱뚱뚱뚱뚱했습니다. 어쩌구 저쩌구...</Text>
+                <Title>{article.title || "제목 없음"}</Title>
+                <Text>{article.content || "내용 없음"}</Text>
                 <Bottom>
-                    <span>1시간 전</span>
+                    <span>{article.createAt ? timeForToday(article.createAt) : "방금 전"}</span>
                     <IconGroup>
-                        <IconImage src={like} alt="좋아요" /> 47
-                        <IconImage src={comment} al="댓글" /> 99+
+                        <IconImage src={article.myLike ? like : unlike} alt="좋아요" /> {article.likeCount ?? 0}
+                        <IconImage src={comment} alt="댓글" /> {article.commentCount ?? 0}
                     </IconGroup>
                 </Bottom>
             </Content>
