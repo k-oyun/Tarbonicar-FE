@@ -7,6 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import SelectBox from "../components/SelectBox";
 import Header from "../components/Header";
 import { useMediaQuery } from "react-responsive";
+import useMainApi from "../api/main";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const MainContainer = styled.div`
   width: 100%;
@@ -120,27 +123,11 @@ const Main = () => {
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
-  const carType = [
-    { label: "전체보기", value: "all" },
-    { label: "승용차", value: "sedan" },
-    { label: "SUV", value: "suv" },
-    { label: "EV", value: "ev" },
-    { label: "승합차", value: "van" },
-  ];
-  const carModel = [
-    { label: "전체보기", value: "all" },
-    { label: "아반떼", value: "avante" },
-    { label: "소나타", value: "sonata" },
-    { label: "그랜저", value: "granduer" },
-    { label: "코나", value: "kona" },
-  ];
-  const carYear = [
-    { label: "전체보기", value: "all" },
-    { label: "2016", value: 2016 },
-    { label: "2017", value: 2017 },
-    { label: "2018", value: 2018 },
-    { label: "2019", value: 2019 },
-  ];
+  const [carType, setCarType] = useState([]);
+
+  const [carName, setCarName] = useState([]);
+  const [carYear, setCarYear] = useState([]);
+  const navigate = useNavigate();
   const handleDownBtn = () => {
     reviewRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -148,6 +135,11 @@ const Main = () => {
   const onClickReviewBtn = () => {
     setIsBtnPressed(true);
     setIsBtnVisible(false);
+    if (selectedType && selectedModel && selectedYear) {
+      navigate("/article-list", {
+        state: { type: selectedType, name: selectedModel, year: selectedYear },
+      });
+    }
   };
 
   useEffect(() => {
@@ -175,7 +167,113 @@ const Main = () => {
       if (reviewRef.current) observer.unobserve(reviewRef.current);
     };
   }, []);
+  // const { carTypeGet, carNameGet, carAgeGet } = useMainApi();
 
+  const carTypeGet = async () => {
+    const url = "http://localhost:8080/api/v1/category/search/cartype";
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const response = await axios.get(url, { headers });
+      return response.data;
+    } catch (error) {
+      console.error("차종 GET:", error);
+    }
+  };
+  useEffect(() => {
+    const typeGet = async () => {
+      const res = await carTypeGet();
+      if (res && Array.isArray(res.data)) {
+        const carTypeList = [
+          { id: 0, value: "all", label: "전체보기" },
+          ...res.data.map((item) => ({
+            id: item.id,
+            value: item.carType,
+            label: item.carType,
+          })),
+        ];
+        setCarType(carTypeList);
+      }
+    };
+
+    typeGet();
+  }, []);
+  const carNameGet = async () => {
+    const url = `http://localhost:8080/api/v1/category/search/carname?carType=${selectedType}`;
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const response = await axios.get(url, { headers });
+      return response.data;
+    } catch (error) {
+      console.error("차 이름 GET:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedType === "all") {
+      setSelectedModel("all");
+      setSelectedYear("all");
+      setCarName([{ id: 0, value: "all", label: "전체보기" }]);
+      return;
+    }
+    if (isBtnPressed) {
+      const nameGet = async () => {
+        const res = await carNameGet();
+        if (res && Array.isArray(res.data)) {
+          const carNameList = [
+            { id: 0, value: "all", label: "전체보기" },
+            ...res.data.map((item) => ({
+              id: item.id,
+              value: item.carName,
+              label: item.carName,
+            })),
+          ];
+          setCarName(carNameList);
+          console.log(name);
+        }
+      };
+      nameGet();
+    }
+  }, [selectedType]);
+
+  const carAgeGet = async () => {
+    const url = `http://localhost:8080/api/v1/category/search/home/carage?carType=${selectedType}&carName=${selectedModel}`;
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const response = await axios.get(url, { headers });
+      return response.data;
+    } catch (error) {
+      console.error("차 연식 GET:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isBtnPressed) {
+      const ageGet = async () => {
+        const res = await carAgeGet();
+        if (res && Array.isArray(res.data)) {
+          const carAgeList = [
+            { id: 0, value: "all", label: "전체보기" },
+            ...res.data.map((item) => ({
+              id: item.id,
+              value: item.carAge,
+              label: item.carAge,
+            })),
+          ];
+          setCarYear(carAgeList);
+        }
+      };
+      ageGet();
+    }
+  }, [selectedModel]);
   return (
     <>
       <Header isReviewVisible={isReviewVisible} />
@@ -222,7 +320,7 @@ const Main = () => {
               }}
             />
             <SelectBox
-              options={carModel}
+              options={carName}
               value={selectedModel}
               onSelect={(val) => setSelectedModel(val)}
               isSelected={selectedModel}
@@ -235,7 +333,6 @@ const Main = () => {
               options={carYear}
               value={selectedYear}
               onSelect={(val) => {
-                console.log("부모가 받은 값", val);
                 setSelectedYear(val);
               }}
               isSelected={selectedYear}
