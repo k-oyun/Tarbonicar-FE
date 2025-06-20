@@ -256,7 +256,6 @@ const ArticleFilter = () => {
                                 list={carNameList.map(i => i.carName)}
                                 selected={selectedCarNames}
                                 setSelected={setSelectedCarNames}
-                                singleSelect={true}
                                 vertical={true}
                             />
                         ) : (
@@ -273,7 +272,6 @@ const ArticleFilter = () => {
                                 list={carAgeList.map(i => `${i.carAge}년`)}
                                 selected={selectedCarAges}
                                 setSelected={setSelectedCarAges}
-                                singleSelect={true}
                             />
                         ) : (
                             <div>차량을 선택하세요.</div>
