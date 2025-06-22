@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import checkIcon from "../../assets/imgs/check.png";
-import uncheckIcon from "../../assets/imgs/uncheck.png";
+import checkIcon from "../assets/imgs/check.png";
+import uncheckIcon from "../assets/imgs/uncheck.png";
 
 const Wrapper = styled.div`
     display: flex;

@@ -1,16 +1,22 @@
 export const timeForToday = (value) => {
-    const today = new Date();
-    const timeValue = new Date(value);
+    const now = new Date();
+    const created = new Date(value);
+    const diffSec = Math.floor((now - created) / 1000);
 
-    const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60); // 분
-    if (betweenTime < 1) return "방금 전";
-    if (betweenTime < 60) return `${betweenTime}분 전`;
+    if (diffSec < 0) return "";
+    if (diffSec < 5)  return "방금 전";
+    if (diffSec < 60) return `${diffSec}초 전`;
 
-    const betweenTimeHour = Math.floor(betweenTime / 60);
-    if (betweenTimeHour < 24) return `${betweenTimeHour}시간 전`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}분 전`;
 
-    const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
-    if (betweenTimeDay < 365) return `${betweenTimeDay}일 전`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour}시간 전`;
 
-    return `${Math.floor(betweenTimeDay / 365)}년 전`;
+    const Y = created.getFullYear();
+    const M = String(created.getMonth() + 1).padStart(2, "0");
+    const D = String(created.getDate()).padStart(2, "0");
+    const h = String(created.getHours()).padStart(2, "0");
+    const m = String(created.getMinutes()).padStart(2, "0");
+    return `${Y}.${M}.${D} ${h}:${m}`;
 }

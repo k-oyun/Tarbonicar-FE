@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { articleApi } from "../api/ArticleApi.js";
-import ArticleFilter from "../components/ArticleFilter/ArticleFilter.jsx";
+import { articleApi } from "../api/articleApi.js";
+import ArticleFilter from "../components/ArticleFilter.jsx";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
 import ArticleListItem from "../components/ArticleListItem.jsx";
@@ -88,7 +88,7 @@ const ArticleList = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [articleList, setArticleList] = useState([]);
-    console.log('이전화면에서 전달된 state:', location.state);
+    const { getArticleListApi } = articleApi();
 
     const norm = val => !val || val === "all" ? "" : val;
     const arrNorm = val => !val || val === "all" ? [] : [val];
@@ -109,10 +109,10 @@ const ArticleList = () => {
     useEffect(() => {
         const fetchList = async () => {
             try {
-                const { articleList: fetchArticleList } = articleApi();
-                const res = await fetchArticleList(filters);
+                const res = await getArticleListApi(filters);
                 setArticleList(res.data.data); // 백엔드 응답에 따라 .data 경로 수정
             } catch (e) {
+                console.log(e);
                 setArticleList([]);
             }
         };
