@@ -8,6 +8,7 @@ import "ckeditor5/ckeditor5.css";
 // assets
 import userAvatar  from "../assets/imgs/Sahuru.png";
 import likeIcon    from "../assets/imgs/Like.png";
+import unlikeIcon   from "../assets/imgs/Unlike.png";
 import commentIcon from "../assets/imgs/Comment.png";
 import CommentListItem from "../components/CommetListItem.jsx";
 import CommentInput from "../components/CommentInput.jsx";
@@ -102,6 +103,22 @@ const ActionButton = styled.button`
     img{ width:${({ $ismobile }) => ($ismobile ? "16px" : "20px")}; margin-right:5px; }
 `;
 
+const ArticleControls = styled.div`
+    margin-left: auto;
+    display:flex; align-items:center;
+    font-size: ${({ $ismobile }) => ($ismobile ? "12px" : "14px")};
+    color:#666;
+    & > span {
+        cursor:pointer;
+        &:hover { color:#c00; }
+        & + span {
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 1px solid #ccc;
+        }
+    }
+`;
+
 const ArticleView = () => {
     const isMobile = useMediaQuery({ query: "(max-width:767px)" });
 
@@ -110,7 +127,8 @@ const ArticleView = () => {
 
     // 게시판
     const [article, setArticle] = useState(null);
-    const { getArticleApi } = articleApi();
+    const { getArticleApi, toggleLikeApi, deleteArticleApi } = articleApi();
+    const [articleDeleteDialogOpen, setArticleDeleteDialogOpen] = useState(false);
 
     // 댓글
     const [comments, setComments] = useState([]);
@@ -140,6 +158,41 @@ const ArticleView = () => {
             })
             .catch(console.error);
     }, [id]);
+
+    // 좋아요 클릭 이벤트
+    const handleLikeClick = async () => {
+        if (!article) return;
+        try {
+            const res = await toggleLikeApi(article.id);
+            if (res.data.success) {
+                // 토글 후 상세 데이터 다시 조회
+                const articleRes = await getArticleApi(id);
+                if (articleRes.data.success) {
+                    setArticle(articleRes.data.data);
+                }
+            } else {
+                alert(res.data.message || "좋아요 처리 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("좋아요 처리 중 오류 발생");
+        }
+    };
+
+    // 게시글 삭제 이벤트
+    const handleArticleDelete = async () => {
+        try {
+            const res = await deleteArticleApi(article.id);
+            if (res.data.success) {
+                window.location.href = "../article-list";
+            } else {
+                alert(res.data.message || "게시글 삭제 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("게시글 삭제 중 오류 발생");
+        }
+    };
 
     // 댓글 등록 이벤트
     const handleCommentSubmit = async (content) => {
@@ -238,6 +291,13 @@ const ArticleView = () => {
                     <Category $ismobile={isMobile}>{typeMap[article.articleType]}</Category>
                     <Tag $ismobile={isMobile}>{carNameTag}</Tag>
                     <Tag $ismobile={isMobile}>{carAgeTag}</Tag>
+
+                    {article.myArticle && (
+                        <ArticleControls $ismobile={isMobile}>
+                            <span onClick={() => window.location.href = `/article-write?id=${article.id}`}>수정</span>
+                            <span onClick={() => setArticleDeleteDialogOpen(true)}>삭제</span>
+                        </ArticleControls>
+                    )}
                 </CategoryRow>
 
                 <Title $ismobile={isMobile}>{article.title}</Title>
@@ -263,8 +323,16 @@ const ArticleView = () => {
                 <Divider $ismobile={isMobile} />
 
                 <ActionContainer $ismobile={isMobile}>
-                    <ActionButton $ismobile={isMobile} $active={article.myLike}>
-                        <img src={likeIcon} alt="좋아요" />{article.likeCount}
+                    <ActionButton
+                        $ismobile={isMobile}
+                        $active={article.myLike}
+                        onClick={handleLikeClick}
+                    >
+                        <img
+                            src={article.myLike ? likeIcon : unlikeIcon}
+                            alt="좋아요"
+                        />
+                        {article.likeCount}
                     </ActionButton>
                     <ActionButton $ismobile={isMobile}>
                         <img src={commentIcon} alt="댓글" />{article.commentCount}
@@ -307,6 +375,16 @@ const ArticleView = () => {
                 onCancel={handleDeleteCancel}
                 showCancel={true}
                 isRedButton={true}
+            />
+
+            <ConfirmDialog
+                isOpen={articleDeleteDialogOpen}
+                title="게시글을 삭제하시겠습니까?"
+                message="삭제된 게시글은 복구할 수 없습니다."
+                showCancel={true}
+                isRedButton={true}
+                onConfirm={handleArticleDelete}
+                onCancel={() => setArticleDeleteDialogOpen(false)}
             />
         </>
     );
