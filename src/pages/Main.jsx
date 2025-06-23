@@ -10,7 +10,6 @@ import { useMediaQuery } from "react-responsive";
 import useMainApi from "../api/main";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import LoginHeader from "../components/LoginHeader";
 
 const MainContainer = styled.div`
   width: 100%;

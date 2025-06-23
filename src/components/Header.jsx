@@ -132,9 +132,10 @@ const Header = ({ isReviewVisible }) => {
 
   const userInfoGet = async () => {
     const url = "http://localhost:8080/api/v1/member/user-info";
+
     const headers = {
       Authorization:
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGRiczEyMDhAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDY0NDA2N30.F40sOr78gIRcNTkEE-Ob8oKyEK3hXiVswy5qRxYcTUBQyrpURHZVVwJM0YeWIC9WkC4_6pxD52kBWmnnLLR7dg",
+        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGRiczEyMDhAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDY0NzE3MH0.U5LIu9sLVKLanexa3J5GPWEI6rZRHIk8X8QDjQg-q1agGt_wThDhkrlcTFiH3qca5Y_KA6FfIRNQfI-8c9e33Q",
       "Content-Type": "application/json",
     };
 
