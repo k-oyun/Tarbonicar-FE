@@ -170,7 +170,7 @@ export default function ArticleWrite() {
     },[ready,toolbarOffset]);
 
     // 데이터 로딩
-    useEffect(()=>{ carTypeListApi.then(r=>setCarTypes(r.data.data||[])).catch(console.error); },[]);
+    useEffect(()=>{ carTypeListApi().then(r => setCarTypes(r.data.data || [] )) },[]);
     useEffect(()=>{
         if(!selectedCarType){
             setCarNames([]); setSelectedCarName(''); setCarAges([]); setSelectedCarAge(''); return;

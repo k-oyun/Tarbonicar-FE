@@ -41,5 +41,15 @@ export const articleApi = () => {
         return await axios.post("/api/v1/article", payload);
     };
 
-    return { getArticleListApi, getArticleApi, postArticleApi };
+    // 좋아요 토글
+    const toggleLikeApi = async (articleId) => {
+        return await axios.post(`/api/v1/article/like/${articleId}`);
+    };
+
+    // 게시글 삭제
+    const deleteArticleApi = async (articleId) => {
+        return await axios.delete(`/api/v1/article/${articleId}`);
+    };
+
+    return { getArticleListApi, getArticleApi, postArticleApi, toggleLikeApi, deleteArticleApi };
 };
