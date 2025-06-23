@@ -2,12 +2,19 @@ import axios from "./AxiosInstance";
 
 export const memberApi = () => {
   // 회원가입
-  const signup = async ({ email, password, checkedPassword, nickname }) => {
+  const signup = async ({
+    email,
+    password,
+    checkedPassword,
+    nickname,
+    profileImage,
+  }) => {
     return await axios.post("/api/v1/member/signup", {
       email,
       password,
       checkedPassword,
       nickname,
+      profileImage,
     });
   };
 
