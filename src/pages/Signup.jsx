@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
-
 import checkIcon from "../assets/imgs/check2.svg";
+import memberApi from "../api/memberApi";
+import { useNavigate } from "react-router-dom";
 
 const PageWrapper = styled.div`
   padding: ${(props) =>
@@ -203,6 +204,8 @@ const Signup = () => {
 
   const [profileImage, setProfileImage] = useState(null);
 
+  const navigate = useNavigate();
+
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
@@ -266,6 +269,18 @@ const Signup = () => {
     if (file) {
       setProfileImage(URL.createObjectURL(file));
     }
+  };
+
+  const handleSubmit = () => {
+    memberApi()
+      .signup({ email, password, checkedPassword: password, nickname })
+      .then(() => {
+        alert("회원가입 성공!");
+        navigate("/login");
+      })
+      .catch((err) => {
+        alert("회원가입 실패: " + (err.response?.data?.message || err.message));
+      });
   };
 
   return (
@@ -383,7 +398,9 @@ const Signup = () => {
         ))}
       </StepWrapper>
       {currentStep === 5 && (
-        <SubmitButton $isMobile={isMobile}>회원가입</SubmitButton>
+        <SubmitButton $isMobile={isMobile} onClick={handleSubmit}>
+          회원가입
+        </SubmitButton>
       )}
     </PageWrapper>
   );
