@@ -22,7 +22,7 @@ const Logo = styled.img`
   margin-left: 30px;
   cursor: pointer;
 `;
-const LoginHeader = () => {
+const RegisterHeader = () => {
   const naviagate = useNavigate();
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
@@ -43,4 +43,4 @@ const LoginHeader = () => {
   );
 };
 
-export default LoginHeader;
+export default RegisterHeader;
