@@ -7,6 +7,8 @@ import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 import { fadeDown } from "../styles/animation";
 import { useMediaQuery } from "react-responsive";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -72,6 +74,7 @@ const LoginBtn = styled.button`
 const Logo = styled.img`
   width: ${(props) => (props.$ismobile ? "60px" : "100px")};
   margin-left: 30px;
+  cursor: pointer;
 `;
 
 const Popup = styled.div`
@@ -113,7 +116,8 @@ const PopupImg = styled.img`
 `;
 
 const Header = ({ isReviewVisible }) => {
-  const [nickname, setNickname] = useState("dsds");
+  const naviagate = useNavigate();
+  const [nickname, setNickname] = useState("");
   const [userImg, setUserImg] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const isMobile = useMediaQuery({
@@ -122,21 +126,52 @@ const Header = ({ isReviewVisible }) => {
   const handlePopup = () => {
     setIsPopupOpen((prev) => !prev);
   };
+  const onClickLogo = () => {
+    naviagate("/");
+  };
 
+  const userInfoGet = async () => {
+    const url = "http://localhost:8080/api/v1/member/user-info";
+    const headers = {
+      Authorization:
+        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGRiczEyMDhAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDY0NDA2N30.F40sOr78gIRcNTkEE-Ob8oKyEK3hXiVswy5qRxYcTUBQyrpURHZVVwJM0YeWIC9WkC4_6pxD52kBWmnnLLR7dg",
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const response = await axios.get(url, { headers });
+      return response.data;
+    } catch (error) {
+      console.error("사용자 정보 조회 GET:", error);
+    }
+  };
   useEffect(() => {
-    setUserImg(sahuruImg);
+    const InfoGet = async () => {
+      const res = await userInfoGet();
+      setNickname(res.data.nickname);
+      setUserImg(res.data.profileImage);
+      console.log(res);
+    };
+
+    InfoGet();
   }, []);
-
-  useEffect(() => {
-    console.log(isMobile);
-  }, [isMobile]);
   return (
     <>
       <HeaderContainer $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
         {isReviewVisible ? (
-          <Logo src={logoImgDark} alt="로고이미지" $ismobile={isMobile} />
+          <Logo
+            src={logoImgDark}
+            alt="로고이미지"
+            $ismobile={isMobile}
+            onClick={onClickLogo}
+          />
         ) : (
-          <Logo src={logoImgWhite} alt="로고이미지" $ismobile={isMobile} />
+          <Logo
+            src={logoImgWhite}
+            alt="로고이미지"
+            $ismobile={isMobile}
+            onClick={onClickLogo}
+          />
         )}
 
         <UserInfoContainer>
@@ -154,7 +189,7 @@ const Header = ({ isReviewVisible }) => {
               </HeaderText>
               <UserImageContainer
                 $ismobile={isMobile}
-                $image={userImg}
+                $image={userImg ? profileImage : profileIcon}
                 onClick={handlePopup}
               />
             </>
