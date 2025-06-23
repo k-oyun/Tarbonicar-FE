@@ -9,6 +9,7 @@ import ArticleList from "./pages/ArticleList.jsx";
 import ArticleView from "./pages/ArticleView.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import KakaoRedirect from "./pages/KakaoRedirect";
 
 function HeaderSelector() {
   const location = useLocation();
@@ -31,6 +32,7 @@ function App() {
         <Route path="/article-view" element={<ArticleView />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/oauth/kakao" element={<KakaoRedirect />} />
       </Routes>
     </BrowserRouter>
   );
