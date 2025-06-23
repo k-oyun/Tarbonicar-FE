@@ -4,6 +4,7 @@ import { useMediaQuery } from "react-responsive";
 import checkIcon from "../assets/imgs/check2.svg";
 import memberApi from "../api/memberApi";
 import { useNavigate } from "react-router-dom";
+import { imageUploadApi } from "../api/imageUploadApi";
 
 const PageWrapper = styled.div`
   padding: ${(props) =>
@@ -187,6 +188,7 @@ const SubmitButton = styled.button`
 const Signup = () => {
   const isMobile = useMediaQuery({ query: "(max-width:767px)" });
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -203,8 +205,8 @@ const Signup = () => {
   const [nickname, setNickname] = useState("");
 
   const [profileImage, setProfileImage] = useState(null);
-
-  const navigate = useNavigate();
+  const { postImageUploadApi } = imageUploadApi();
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -226,7 +228,6 @@ const Signup = () => {
     }
 
     const isDuplicate = false;
-
     if (isDuplicate) {
       setEmailError("이미 사용 중인 이메일입니다.");
     } else {
@@ -264,23 +265,47 @@ const Signup = () => {
     setNickname(e.target.value);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file));
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const res = await postImageUploadApi(formData);
+        const url = res.data.data;
+        setUploadedImageUrl(url);
+        setProfileImage(URL.createObjectURL(file));
+      } catch {
+        alert("이미지 업로드 실패");
+      }
     }
   };
 
-  const handleSubmit = () => {
-    memberApi()
-      .signup({ email, password, checkedPassword: password, nickname })
-      .then(() => {
-        alert("회원가입 성공!");
-        navigate("/login");
-      })
-      .catch((err) => {
-        alert("회원가입 실패: " + (err.response?.data?.message || err.message));
+  const handleSubmit = async () => {
+    try {
+      let imageUrl = uploadedImageUrl;
+      if (!imageUrl && fileInputRef.current?.files?.[0]) {
+        const formData = new FormData();
+        formData.append("image", fileInputRef.current.files[0]);
+
+        const res = await imageUploadApi().postImageUploadApi(formData);
+        imageUrl = res.data.data;
+      }
+
+      await memberApi().signup({
+        email,
+        password,
+        checkedPassword: password,
+        nickname,
+        profileImage: imageUrl,
       });
+
+      alert("회원가입 성공!");
+      navigate("/login");
+    } catch (err) {
+      alert("회원가입 실패: " + (err.response?.data?.message || err.message));
+    }
   };
 
   return (
