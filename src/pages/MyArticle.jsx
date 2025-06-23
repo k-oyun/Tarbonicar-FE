@@ -51,6 +51,7 @@ const Content = styled.div`
   padding-right: 30px;
   max-width: 1200px;
   margin: 0 auto;
+  overflow: visible;
 `;
 
 // 필터 + 게시글 영역
@@ -91,16 +92,18 @@ const CardGrid = styled.div`
   }
 `;
 
+const sortOptions = [
+  { label: "최근 작성 순", value: "latest" },
+  { label: "마지막 작성 순", value: "updated" },
+  { label: "좋아요 순", value: "likes" },
+];
+
 const MyArticle = () => {
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
 
-  const [sortOption, setSortOption] = useState("최근 작성순");
-  const sortOptionList = [
-    { value: "latest", name: "최신순" },
-    { value: "oldest", name: "오래된 순" },
-  ];
+  const [sortType, setSortType] = useState("latest");
   return (
     <>
       <>
@@ -117,17 +120,18 @@ const MyArticle = () => {
             <Layout $ismobile={isMobile}>
               {/* 오른쪽 (또는 아래쪽) 콘텐츠 */}
               <ContentArea>
-                <SortWrapper>
+                <div style={{ textAlign: "right", marginBottom: "20px" }}>
                   <SortDropdown
-                    selected={sortOption}
-                    onSelect={setSortOption}
+                    options={sortOptions}
+                    value={sortType}
+                    onChange={setSortType}
                   />
-                </SortWrapper>
-                <CardGrid>
+                </div>
+                {/* <CardGrid>
                   {Array.from({ length: 10 }).map((_, i) => (
                     <ArticleListItem key={i} />
                   ))}
-                </CardGrid>
+                </CardGrid> */}
               </ContentArea>
             </Layout>
           </Content>

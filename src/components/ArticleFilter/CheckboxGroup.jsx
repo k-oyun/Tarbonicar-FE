@@ -35,25 +35,32 @@ const StyledLabel = styled.label`
 const CheckboxGroup = ({ list, selected, setSelected, singleSelect = false, vertical = false }) => {
     const toggle = (value) => {
         if (singleSelect) {
-            setSelected(prev => prev.includes(value) ? [] : [value]);
+            setSelected(selected[0] === value ? [] : [value]);
         } else {
-            setSelected(prev =>
-                prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+            setSelected(
+                selected.includes(value)
+                    ? selected.filter(v => v !== value)
+                    : [...selected, value]
             );
         }
     };
 
     return (
         <Wrapper vertical={vertical}>
-            {list.map((item, i) => (
-                <StyledLabel key={i} checked={selected.includes(item)}>
-                    <HiddenCheckbox
-                        checked={selected.includes(item)}
-                        onChange={() => toggle(item)}
-                    />
-                    {item}
-                </StyledLabel>
-            ))}
+            {list.map((item) => {
+                // 객체형(list={CATEGORY_OPTIONS}) 지원
+                const value = typeof item === "string" ? item : item.value;
+                const label = typeof item === "string" ? item : item.label;
+                return (
+                    <StyledLabel key={value} checked={selected.includes(value)}>
+                        <HiddenCheckbox
+                            checked={selected.includes(value)}
+                            onChange={() => toggle(value)}
+                        />
+                        {label}
+                    </StyledLabel>
+                );
+            })}
         </Wrapper>
     );
 };

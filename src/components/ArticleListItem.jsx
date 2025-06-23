@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import Sahuru from "../assets/imgs/Sahuru.png";
+import { timeForToday } from "../utils/timeForToday.js";
+import defaultImage from "../assets/imgs/Sahuru.png";
 import like from "../assets/Svgs/like.svg";
 import unlike from "../assets/Svgs/unlike.svg";
 import comment from "../assets/Svgs/comment.svg";
+import DOMPurify from "dompurify";
 
 const Card = styled.div`
   background-color: white;
@@ -28,6 +30,22 @@ const IconImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+`;
+
+const TagRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+const Tag = styled.span`
+  background: #f1f3f6;
+  color: #888;
+  border-radius: 20px;
+  font-size: 13px;
+  padding: 4px 10px 4px 10px;
+  font-weight: 500;
+  display: inline-block;
 `;
 
 const Content = styled.div`
@@ -66,28 +84,44 @@ const IconGroup = styled.div`
   gap: 8px;
 `;
 
-const ArticleListItem = () => {
+const ArticleListItem = ({ article }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("../article-view");
+    navigate(`/article-view?id=${article.id}`);
+  };
+
+  const stripHtml = (html) => {
+    // 태그만 제거하고, 텍스트만 남김
+    const div = document.createElement("div");
+    div.innerHTML = DOMPurify.sanitize(html); // 혹시나 XSS 방지
+    return div.textContent || div.innerText || "";
   };
 
   return (
     <Card onClick={handleClick}>
-      <Image src={Sahuru} alt="차량 이미지" />
+      <Image src={article.imageUrl || defaultImage} alt="차량 이미지" />
       <Content>
-        <Title>아주 만족스러운 경험</Title>
-        <Text>
-          차가 정말 뚱뚱뚱뚱뚱했습니다. 어쩌구 저쩌구...차가 정말
-          뚱뚱뚱뚱뚱했습니다. 어쩌구 저쩌구...차가 정말 뚱뚱뚱뚱뚱했습니다.
-          어쩌구 저쩌구...
-        </Text>
+        <TagRow>
+          <Tag>#{article.carName || "차량"}</Tag>
+          <Tag>
+            #
+            {article.carAge
+              ? `${String(article.carAge).slice(-2)}년식`
+              : "연식"}
+          </Tag>
+        </TagRow>
+        <Title>{article.title || "제목 없음"}</Title>
+        <Text>{stripHtml(article.content || "내용 없음")}</Text>
+
         <Bottom>
-          <span>1시간 전</span>
+          <span>
+            {article.createAt ? timeForToday(article.createAt) : "방금 전"}
+          </span>
           <IconGroup>
-            <IconImage src={like} alt="좋아요" /> 47
-            <IconImage src={comment} al="댓글" /> 99+
+            <IconImage src={article.myLike ? like : unlike} alt="좋아요" />{" "}
+            {article.likeCount ?? 0}
+            <IconImage src={comment} alt="댓글" /> {article.commentCount ?? 0}
           </IconGroup>
         </Bottom>
       </Content>

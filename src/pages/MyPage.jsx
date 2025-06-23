@@ -3,6 +3,8 @@ import styled from "styled-components";
 import sahuruImg from "../assets/imgs/Sahuru.png";
 import { useMediaQuery } from "react-responsive";
 import { useNavigate } from "react-router-dom";
+import { updateNickname, updatePassword } from "../api/UpdateMemberInfo";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -261,11 +263,21 @@ const ActionButton = styled.div`
 
 // const SideMenu = styled.div``;
 const MyPage = () => {
-  const [nickname, setNickname] = useState("사후르");
-  const [password, setPassword] = useState("1234");
+  const [curNickname, setCurNickname] = useState("사후르");
+  const [nickname, setNickname] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [userImg, setUserImg] = useState("");
   const [selectedMenu, setSelectedMenu] = useState("프로필");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const navigate = useNavigate();
+
+  const handleWithdraw = () => {
+    console.log("회원 탈퇴");
+    setIsModalOpen(false);
+  };
+
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
@@ -277,6 +289,29 @@ const MyPage = () => {
   useEffect(() => {
     console.log(isMobile);
   }, [isMobile]);
+
+  const handleNicknameChange = async () => {
+    try {
+      await updateNickname(nickname);
+      setCurNickname(nickname);
+      alert("닉네임이 변경되었습니다.");
+    } catch (e) {
+      alert("닉네임 변경 중 오류 발생");
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (password !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    try {
+      await updatePassword(password, confirmPassword);
+      alert("비밀번호가 변경되었습니다.");
+    } catch (e) {
+      alert("비밀번호 변경 중 오류 발생");
+    }
+  };
 
   const renderMainContent = () => {
     switch (selectedMenu) {
@@ -324,13 +359,12 @@ const MyPage = () => {
                 <InputField
                   $ismobile={isMobile}
                   id="nickname"
-                  value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                 />
               </InputRow>
               <ButtonGroup>
                 <CancelButton>취소</CancelButton>
-                <ActionButton>변경</ActionButton>
+                <ActionButton onClick={handleNicknameChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
           </>
@@ -351,18 +385,20 @@ const MyPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <br />
-                <InputLabel htmlFor="password">비밀번호 확인: </InputLabel>
+                <InputLabel htmlFor="confirmPassword">
+                  비밀번호 확인:{" "}
+                </InputLabel>
                 <InputField
                   $ismobile={isMobile}
                   $withRightMargin
-                  id="password"
+                  id="confirmPassword"
                   type="password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </InputRow>
               <ButtonGroup>
                 <CancelButton>취소</CancelButton>
-                <ActionButton>변경</ActionButton>
+                <ActionButton onClick={handlePasswordChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
           </>
@@ -405,11 +441,21 @@ const MyPage = () => {
             >
               비밀번호 수정
             </MenuItem>
-            <MenuItem $ismobile={isMobile}>회원탈퇴</MenuItem>
+            <ConfirmDialog
+              isOpen={isModalOpen}
+              title="회원 탈퇴 하시겠습니까?"
+              message="회원 탈퇴 할 경우 작성한 게시판 내용은 복구할 수 없습니다."
+              onCancel={() => setIsModalOpen(false)}
+              onConfirm={handleWithdraw}
+              isRedButton={true}
+            />
+            <MenuItem $ismobile={isMobile} onClick={() => setIsModalOpen(true)}>
+              회원탈퇴
+            </MenuItem>
           </SideMenu>
           <MainSection>
             <h3>
-              <strong>{nickname}</strong>님, 안녕하세요!
+              <strong>{curNickname}</strong>님, 안녕하세요!
             </h3>
             <StatsBar>
               <StatsItem

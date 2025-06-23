@@ -1,86 +1,95 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
-import { FiChevronDown } from "react-icons/fi";
+import ArrowDownIcon from "../assets/imgs/arrow_down.png"; // 화살표 아이콘
 
-const DropdownContainer = styled.div`
+const Container = styled.div`
   position: relative;
   display: inline-block;
 `;
 
-const DropdownButton = styled.button`
+const Button = styled.button`
+  background-color: transparent;
+  border: none;
+  font-size: 15px;
+  color: #333;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: white;
-  cursor: pointer;
+  gap: 4px;
 `;
 
-const DropdownList = styled.ul`
-  position: absolute;
+const Dropdown = styled.ul`
   top: 100%;
   right: 0;
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 6px 0;
   background: white;
   border: 1px solid #ccc;
   border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   list-style: none;
-  padding: 0;
   z-index: 1000;
-  width: 180px;
+  min-width: 140px;
 `;
 
 const DropdownItem = styled.li`
-  padding: 10px 12px;
-  cursor: pointer;
+  padding: 8px 16px;
   font-size: 14px;
+  color: ${(props) => (props.selected ? "#0d6efd" : "#333")};
+  background-color: ${(props) => (props.selected ? "#f0f8ff" : "#fff")};
+  cursor: pointer;
+
   &:hover {
-    background-color: #f5f5f5;
+    background-color: #f4f4f4;
   }
 `;
 
-const SortDropdown = ({ selected = "최근 작성 순", onSelect = () => {} }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef();
-  const CATEGORIES = ["최근 작성 순", "마지막 작성 순", "좋아요 순"];
+const Arrow = styled.img`
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s;
+  transform: ${(props) => (props.open ? "rotate(180deg)" : "rotate(0deg)")};
+`;
 
-  // 외부 클릭 시 닫힘
+const SortDropdown = ({ options, value, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef();
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
-        setIsOpen(false);
+        setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const selectedLabel = options.find((opt) => opt.value === value)?.label;
+
   return (
-    <DropdownContainer ref={ref}>
-      <DropdownButton onClick={() => setIsOpen((prev) => !prev)}>
-        {selected}
-        <FiChevronDown />
-      </DropdownButton>
-      {isOpen && (
-        <DropdownList>
-          {CATEGORIES.map((item) => (
+    <Container ref={ref}>
+      <Button onClick={() => setOpen((prev) => !prev)}>
+        {selectedLabel || "정렬"}
+        <Arrow src={ArrowDownIcon} open={open} />
+      </Button>
+      {open && (
+        <Dropdown>
+          {options.map((opt) => (
             <DropdownItem
-              key={item}
+              key={opt.value}
+              selected={opt.value === value}
               onClick={() => {
-                onSelect(item);
-                setIsOpen(false);
+                onChange(opt.value);
+                setOpen(false);
               }}
             >
-              {item}
+              {opt.label}
             </DropdownItem>
           ))}
-        </DropdownList>
+        </Dropdown>
       )}
-    </DropdownContainer>
+    </Container>
   );
 };
 
