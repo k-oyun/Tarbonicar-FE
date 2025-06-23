@@ -12,7 +12,6 @@ function App() {
   return (
     // <ModalSample/>
     <BrowserRouter>
-      <Header />
       <Routes>
         <Route Component={Main} path="/" />
         <Route path="/article-write" element={<ArticleWrite />} />
