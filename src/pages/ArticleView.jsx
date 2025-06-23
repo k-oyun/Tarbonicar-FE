@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { useMediaQuery } from "react-responsive";
-import useArticleApi from "../api/articleView.js";
 
 // CKEditor 콘텐츠 CSS
 import "ckeditor5/ckeditor5.css";
@@ -10,6 +9,12 @@ import "ckeditor5/ckeditor5.css";
 import userAvatar  from "../assets/imgs/Sahuru.png";
 import likeIcon    from "../assets/imgs/Like.png";
 import commentIcon from "../assets/imgs/Comment.png";
+import CommentListItem from "../components/CommetListItem.jsx";
+import CommentInput from "../components/CommentInput.jsx";
+import {timeForToday} from "../utils/timeForToday.js";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import {commentApi} from "../api/commentApi.js";
+import {articleApi} from "../api/articleApi.js";
 
 const GlobalStyle = createGlobalStyle`
     @import url('https://fonts.googleapis.com/css2?family=Oswald&family=Lato:wght@300;400;700&display=swap');
@@ -103,38 +108,113 @@ const ArticleView = () => {
     // 쿼리스트링에서 id 추출
     const id = useMemo(() => new URLSearchParams(window.location.search).get("id"), []);
 
+    // 게시판
     const [article, setArticle] = useState(null);
-    const { getArticle } = useArticleApi();
+    const { getArticleApi } = articleApi();
+
+    // 댓글
+    const [comments, setComments] = useState([]);
+    const { getCommentList, postComment, putComment, deleteComment } = commentApi();
+
+    // 댓글 수정
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const handleEditClick = (id) => setEditingCommentId(id);
+    const handleEditCancel = () => setEditingCommentId(null);
+
+    // 댓글 삭제
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [commentToDelete, setCommentToDelete] = useState(null);
 
     useEffect(() => {
         if (!id) return;
 
-        getArticle(id)
+        // 게시글 불러오기
+        getArticleApi(id)
             .then(res => res.data.success && setArticle(res.data.data))
+            .catch(console.error);
+
+        // 댓글 불러오기
+        getCommentList(id)
+            .then(res => {
+                if (res.data.success) setComments(res.data.data);
+            })
             .catch(console.error);
     }, [id]);
 
-    const displayTime = iso => {
-        const now = new Date();
-        const created = new Date(iso);
-        const diffSec = Math.floor((now - created) / 1000);
+    // 댓글 등록 이벤트
+    const handleCommentSubmit = async (content) => {
+        try {
+            // 댓글 등록
+            const res = await postComment(id, content);
+            if (res.data.success) {
+                // 등록 후 댓글 목록 새로고침
+                const listRes = await getCommentList(id);
+                if (listRes.data.success) setComments(listRes.data.data);
+                getArticleApi(id)
+                    .then(res => res.data.success && setArticle(res.data.data));
+            } else {
+                alert(res.data.message || "댓글 등록 실패");
+            }
+        } catch (e) {
+            alert("댓글 등록 중 오류 발생");
+            console.error(e);
+        }
+    };
 
-        if (diffSec < 0) return "";
-        if (diffSec < 5)  return "방금 전";
-        if (diffSec < 60) return `${diffSec}초 전`;
+    // 댓글 수정 이벤트
+    const handleEditComplete = async (id, newContent) => {
+        try {
+            // 수정 API 호출
+            const res = await putComment(id, newContent, article.id);
+            if (res.data.success) {
+                // 성공 시 댓글 목록 새로고침
+                const listRes = await getCommentList(article.id);
+                if (listRes.data.success) setComments(listRes.data.data);
+                setEditingCommentId(null);
+                getArticleApi(article.id)
+                    .then(res => res.data.success && setArticle(res.data.data));
+            } else {
+                alert(res.data.message || "댓글 수정 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("댓글 수정 중 오류 발생");
+        }
+    };
 
-        const diffMin = Math.floor(diffSec / 60);
-        if (diffMin < 60) return `${diffMin}분 전`;
+    // 댓글 삭제 다이얼로그 확인 이벤트
+    const handleDeleteClick = (commentId) => {
+        setCommentToDelete(commentId);
+        setDeleteDialogOpen(true);
+    };
 
-        const diffHour = Math.floor(diffMin / 60);
-        if (diffHour < 24) return `${diffHour}시간 전`;
+    // 뎃글 삭제 다이얼로그 취소 이벤트
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setCommentToDelete(null);
+    };
 
-        const Y = created.getFullYear();
-        const M = String(created.getMonth() + 1).padStart(2, "0");
-        const D = String(created.getDate()).padStart(2, "0");
-        const h = String(created.getHours()).padStart(2, "0");
-        const m = String(created.getMinutes()).padStart(2, "0");
-        return `${Y}.${M}.${D} ${h}:${m}`;
+    // 댓글 삭제 이벤트
+    const handleDeleteConfirm = async () => {
+        try {
+            if (!commentToDelete) return;
+            const res = await deleteComment(commentToDelete);
+            if (res.data.success) {
+                // 삭제 후 목록 새로고침
+                const listRes = await getCommentList(article.id);
+                if (listRes.data.success) setComments(listRes.data.data);
+                getArticleApi(article.id)
+                    .then(res => res.data.success && setArticle(res.data.data));
+            } else {
+                alert(res.data.message || "댓글 삭제 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("댓글 삭제 중 오류 발생");
+        } finally {
+            setDeleteDialogOpen(false);
+            setCommentToDelete(null);
+        }
     };
 
     const typeMap = { REVIEW:"차량 리뷰", TIP:"차량 팁", TESTDRIVE:"시승 후기" };
@@ -167,7 +247,7 @@ const ArticleView = () => {
                         <Avatar src={article.profileImage || userAvatar} alt="작성자" $ismobile={isMobile}/>
                         <AuthorInfo $ismobile={isMobile}>
                             <span>{article.nickname}</span>
-                            <span>{displayTime(article.createdAt)}{article.modify && " (수정됨)"}</span>
+                            <span>{timeForToday(article.createdAt)}{article.modify && " (수정됨)"}</span>
                         </AuthorInfo>
                     </AuthorRow>
                     <ViewCount $ismobile={isMobile}>조회수 {article.viewCount}</ViewCount>
@@ -187,10 +267,47 @@ const ArticleView = () => {
                         <img src={likeIcon} alt="좋아요" />{article.likeCount}
                     </ActionButton>
                     <ActionButton $ismobile={isMobile}>
-                        <img src={commentIcon} alt="댓글" />0
+                        <img src={commentIcon} alt="댓글" />{article.commentCount}
                     </ActionButton>
                 </ActionContainer>
+
+                {/* 댓글 입력칸 */}
+                <CommentInput onSubmit={handleCommentSubmit} avatar={article.profileImage} nickname={article.nickname} />
+
+                {/* 댓글 리스트 */}
+                <div style={{ marginTop: "40px" }}>
+                    {comments.length === 0 ? (
+                        <div style={{ color: "#999", padding: "16px 0" }}>댓글이 없습니다.</div>
+                    ) : (
+                        comments.map(c => (
+                            <CommentListItem
+                                key={c.id}
+                                comment={{
+                                    ...c,
+                                    createdAt: c.createAt
+                                }}
+                                isMine={c.myComment}
+                                editing={editingCommentId === c.id}
+                                onDelete={handleDeleteClick}
+                                onReport={() => {/* 신고 구현 */}}
+                                onEdit={handleEditClick}
+                                onEditComplete={handleEditComplete}
+                                onEditCancel={handleEditCancel}
+                            />
+                        ))
+                    )}
+                </div>
             </Container>
+
+            <ConfirmDialog
+                isOpen={deleteDialogOpen}
+                title="댓글을 삭제하시겠습니까?"
+                message="삭제된 댓글은 복구할 수 없습니다."
+                onConfirm={handleDeleteConfirm}
+                onCancel={handleDeleteCancel}
+                showCancel={true}
+                isRedButton={true}
+            />
         </>
     );
 };
