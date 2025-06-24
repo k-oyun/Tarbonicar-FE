@@ -125,6 +125,15 @@ const ArticleControls = styled.div`
     }
 `;
 
+const GoToLoginBox = styled.div`
+    border: 1.5px solid #CCCCCC;
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 20px;
+    background: #fff;
+    margin-bottom: 18px;
+`;
+
 const ArticleView = () => {
     const isMobile = useMediaQuery({ query: "(max-width:767px)" });
     // 로그인 상태 확인
@@ -349,7 +358,20 @@ const ArticleView = () => {
                 </ActionContainer>
 
                 {/* 댓글 입력칸 */}
-                <CommentInput onSubmit={handleCommentSubmit} avatar={article.profileImage} nickname={article.nickname} />
+                {isLoggedIn && (
+                    <CommentInput
+                        onSubmit={handleCommentSubmit}
+                        avatar={article.profileImage}
+                        nickname={article.nickname}
+                    />
+                )}
+
+                {/* 비로그인 시 댓글 입력칸 */}
+                {!isLoggedIn && (
+                    <GoToLoginBox style={{color:"#999", padding:"20px 0", textAlign:"center"}}>
+                        댓글을 작성하려면 <a href="/login" style={{color:"#02C5F"}}>로그인</a> 해주세요.
+                    </GoToLoginBox>
+                )}
 
                 {/* 댓글 리스트 */}
                 <div style={{ marginTop: "40px" }}>
