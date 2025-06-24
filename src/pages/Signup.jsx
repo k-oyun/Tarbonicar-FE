@@ -204,12 +204,21 @@ const Signup = () => {
   const [passwordsMatch, setPasswordsMatch] = useState(false);
 
   const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
 
   const [profileImage, setProfileImage] = useState(null);
   const { postImageUploadApi } = imageUploadApi();
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
   const [dialog, setDialog] = useState({ isOpen: false });
+  const inputRefs = useRef([]);
+
+  const moveToNextStep = (nextStep) => {
+    setCurrentStep(nextStep);
+    requestAnimationFrame(() => {
+      inputRefs.current[nextStep - 1]?.focus();
+    });
+  };
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -224,18 +233,25 @@ const Signup = () => {
     }
   };
 
-  const handleEmailCheck = () => {
+  const handleEmailCheck = async () => {
     if (!emailValid) {
       setEmailError("올바른 이메일 형식을 입력해주세요.");
       return;
     }
 
-    const isDuplicate = false;
-    if (isDuplicate) {
-      setEmailError("이미 사용 중인 이메일입니다.");
-    } else {
-      setEmailError("");
-      setCurrentStep(2);
+    try {
+      const res = await memberApi().checkEmail(email);
+      const isDuplicate = res.data.data;
+
+      if (isDuplicate) {
+        setEmailError("이미 사용 중인 이메일입니다.");
+      } else {
+        setEmailError("");
+        moveToNextStep(2);
+      }
+    } catch (err) {
+      console.error(err);
+      setEmailError("이메일 확인 중 오류가 발생했습니다.");
     }
   };
 
@@ -265,12 +281,46 @@ const Signup = () => {
   };
 
   const handleNicknameChange = (e) => {
-    setNickname(e.target.value);
+    const value = e.target.value.trim();
+    setNickname(value);
+
+    if (value.length < 2 || value.length > 20) {
+      setNicknameError("닉네임은 2~20자 이내여야 합니다.");
+    } else {
+      setNicknameError("");
+    }
   };
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedTypes.includes(file.type)) {
+        setDialog({
+          isOpen: true,
+          title: "이미지는 jpg, jpeg, png 형식만 가능합니다.",
+          showCancel: false,
+          isRedButton: true,
+          onConfirm: () => setDialog({ isOpen: false }),
+          onCancel: () => {},
+        });
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setDialog({
+          isOpen: true,
+          title: "이미지 용량은 5MB 이하만 가능합니다.",
+          showCancel: false,
+          isRedButton: true,
+          onConfirm: () => setDialog({ isOpen: false }),
+          onCancel: () => {},
+        });
+        return;
+      }
+
       const formData = new FormData();
       formData.append("image", file);
 
@@ -304,10 +354,10 @@ const Signup = () => {
       }
 
       await memberApi().signup({
-        email,
-        password,
-        checkedPassword: password,
-        nickname,
+        email: email.trim(),
+        password: password.trim(),
+        checkedPassword: password.trim(),
+        nickname: nickname.trim(),
         profileImage: imageUrl,
       });
 
@@ -373,6 +423,7 @@ const Signup = () => {
                       type="email"
                       value={email}
                       onChange={handleEmailChange}
+                      ref={(el) => (inputRefs.current[0] = el)}
                     />
                     <CheckButton onClick={handleEmailCheck}>
                       중복 확인
@@ -387,9 +438,10 @@ const Signup = () => {
                     type="password"
                     value={password}
                     onChange={handlePasswordChange}
+                    ref={(el) => (inputRefs.current[1] = el)} //
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && passwordValid) {
-                        setCurrentStep(3);
+                        moveToNextStep(3);
                       }
                     }}
                   />
@@ -402,9 +454,10 @@ const Signup = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={handleConfirmPasswordChange}
+                    ref={(el) => (inputRefs.current[2] = el)} //
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && confirmPassword === password) {
-                        setCurrentStep(4);
+                        moveToNextStep(4);
                       }
                     }}
                   />
@@ -414,16 +467,20 @@ const Signup = () => {
                 </>
               )}
               {step === 4 && currentStep === 4 && (
-                <Input
-                  type="text"
-                  value={nickname}
-                  onChange={handleNicknameChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && nickname.length >= 2) {
-                      setCurrentStep(5);
-                    }
-                  }}
-                />
+                <>
+                  <Input
+                    type="text"
+                    value={nickname}
+                    onChange={handleNicknameChange}
+                    ref={(el) => (inputRefs.current[3] = el)} //
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && nickname.length >= 2) {
+                        moveToNextStep(5);
+                      }
+                    }}
+                  />
+                  {nicknameError && <ErrorMsg>{nicknameError}</ErrorMsg>}
+                </>
               )}
               {step === 5 && currentStep === 5 && (
                 <>
@@ -438,9 +495,10 @@ const Signup = () => {
                     <UploadButton htmlFor="profile-upload" $isMobile={isMobile}>
                       이미지 첨부
                     </UploadButton>
-
-                    {profileImage && (
+                    {profileImage ? (
                       <PreviewImage src={profileImage} alt="미리보기" />
+                    ) : (
+                      <PreviewImage style={{ visibility: "hidden" }} />
                     )}
                   </UploadWrapper>
                 </>
