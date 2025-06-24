@@ -5,6 +5,7 @@ import checkIcon from "../assets/imgs/check2.svg";
 import memberApi from "../api/memberApi";
 import { useNavigate } from "react-router-dom";
 import { imageUploadApi } from "../api/imageUploadApi";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const PageWrapper = styled.div`
   padding: ${(props) =>
@@ -208,6 +209,8 @@ const Signup = () => {
   const { postImageUploadApi } = imageUploadApi();
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
+  const [dialog, setDialog] = useState({ isOpen: false });
+
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
@@ -277,7 +280,14 @@ const Signup = () => {
         setUploadedImageUrl(url);
         setProfileImage(URL.createObjectURL(file));
       } catch {
-        alert("이미지 업로드 실패");
+        setDialog({
+          isOpen: true,
+          title: "이미지 업로드 실패",
+          showCancel: false,
+          isRedButton: true,
+          onConfirm: () => setDialog({ isOpen: false }),
+          onCancel: () => {},
+        });
       }
     }
   };
@@ -301,10 +311,27 @@ const Signup = () => {
         profileImage: imageUrl,
       });
 
-      alert("회원가입 성공!");
-      navigate("/login");
+      setDialog({
+        isOpen: true,
+        title: "회원가입이 완료되었습니다.",
+        showCancel: true,
+        isRedButton: false,
+        onConfirm: () => {
+          setDialog({ isOpen: false });
+          navigate("/login");
+        },
+        onCancel: () => setDialog({ isOpen: false }),
+      });
     } catch (err) {
-      alert("회원가입 실패: " + (err.response?.data?.message || err.message));
+      setDialog({
+        isOpen: true,
+        title: "회원가입 실패",
+        message: err.response?.data?.message || err.message,
+        showCancel: false,
+        isRedButton: true,
+        onConfirm: () => setDialog({ isOpen: false }),
+        onCancel: () => {},
+      });
     }
   };
 
@@ -427,6 +454,16 @@ const Signup = () => {
           회원가입
         </SubmitButton>
       )}
+
+      <ConfirmDialog
+        isOpen={dialog.isOpen}
+        title={dialog.title}
+        message={dialog.message}
+        showCancel={dialog.showCancel}
+        isRedButton={dialog.isRedButton}
+        onConfirm={dialog.onConfirm}
+        onCancel={dialog.onCancel}
+      />
     </PageWrapper>
   );
 };
