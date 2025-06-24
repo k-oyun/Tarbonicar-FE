@@ -315,6 +315,7 @@ const Main = () => {
               onSelect={(val) => setSelectedType(val)}
               isSelected={selectedType}
               placeholder="차종"
+              width={"110px"}
               onClick={() => {
                 setIsBtnVisible(false);
               }}
@@ -325,6 +326,7 @@ const Main = () => {
               onSelect={(val) => setSelectedModel(val)}
               isSelected={selectedModel}
               placeholder="차량"
+              width={"110px"}
               onClick={() => {
                 setIsBtnVisible(false);
               }}
@@ -337,6 +339,7 @@ const Main = () => {
               }}
               isSelected={selectedYear}
               placeholder="연식"
+              width={"110px"}
               onClick={() => {
                 setIsBtnVisible(false);
               }}

@@ -25,7 +25,7 @@ const SelectBoxButton = styled.button`
 `;
 
 const SelectBoxList = styled.div`
-  width: 110px;
+  width: ${(props) => props.$width};
   padding: 5px;
   display: flex;
   flex-direction: column;
@@ -65,6 +65,7 @@ const SelectBox = ({
   onSelect,
   isSelected,
   onClick,
+  width,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectBoxRef = useRef(null);
@@ -98,7 +99,7 @@ const SelectBox = ({
         {selectedLabel || placeholder}
       </SelectBoxButton>
       {isOpen ? (
-        <SelectBoxList $isOpen={isOpen} $isSelected={isSelected}>
+        <SelectBoxList $isOpen={isOpen} $isSelected={isSelected} $width={width}>
           {options.map((opt) => (
             <SelectBoxItem
               key={opt.value}
