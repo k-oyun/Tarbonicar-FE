@@ -274,7 +274,9 @@ const Login = () => {
           </InputBox>
           {pwError && <ErrorText>{pwError}</ErrorText>}
 
-          <SubText>아이디 or 비밀번호 재설정</SubText>
+          <SubText onClick={() => navigate("/password-reset-request")}>
+            비밀번호 재설정
+          </SubText>
 
           <LoginButton type="submit" disabled={!email || !password}>
             로그인
