@@ -53,6 +53,10 @@ const TopBar = styled.div`
     display: flex;
     justify-content: flex-end;
     margin-bottom: 16px;
+
+    @media (max-width: 767px) {
+        justify-content: center;
+    }
 `;
 
 // 작성 버튼
@@ -68,6 +72,11 @@ const WriteButton = styled.button`
 
     &:hover {
         background-color: #001e3e;
+    }
+    
+    @media (max-width: 767px) {
+        width: 100%;
+        margin-right: 0;
     }
 `;
 
