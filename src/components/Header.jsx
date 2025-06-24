@@ -130,6 +130,14 @@ const Header = ({ isReviewVisible }) => {
     naviagate("/");
   };
 
+  const onClickLoginText = () => {
+    naviagate("/login");
+  };
+
+  const onClickMypage = () => {
+    naviagate("/mypage");
+  };
+
   const userInfoGet = async () => {
     const url = "http://localhost:8080/api/v1/member/user-info";
 
@@ -177,7 +185,11 @@ const Header = ({ isReviewVisible }) => {
 
         <UserInfoContainer>
           {nickname === "" ? (
-            <LoginBtn $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+            <LoginBtn
+              $ismobile={isMobile}
+              $isReviewVisible={isReviewVisible}
+              onClick={onClickLoginText}
+            >
               로그인하러 가기
             </LoginBtn>
           ) : (
