@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {useState, useEffect, useMemo, useCallback, useRef} from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { useMediaQuery } from "react-responsive";
 
@@ -16,6 +16,7 @@ import {timeForToday} from "../utils/timeForToday.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import {commentApi} from "../api/commentApi.js";
 import {articleApi} from "../api/articleApi.js";
+import {Pagination} from "@mui/material";
 
 const GlobalStyle = createGlobalStyle`
     @import url('https://fonts.googleapis.com/css2?family=Oswald&family=Lato:wght@300;400;700&display=swap');
@@ -135,6 +136,8 @@ const GoToLoginBox = styled.div`
 `;
 
 const ArticleView = () => {
+
+
     const isMobile = useMediaQuery({ query: "(max-width:767px)" });
     // 로그인 상태 확인
     const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
@@ -148,8 +151,14 @@ const ArticleView = () => {
     const [articleDeleteDialogOpen, setArticleDeleteDialogOpen] = useState(false);
 
     // 댓글
-    const [comments, setComments] = useState([]);
     const { getCommentList, postComment, putComment, deleteComment } = commentApi();
+    const [comments, setComments] = useState([]);
+    const [commentPage, setCommentPage] = useState(0);         // 현재 페이지 (0부터 시작)
+    const [commentPageSize] = useState(20);                    // 한 페이지에 보여줄 댓글 수
+    const [commentTotalPages, setCommentTotalPages] = useState(0); // 전체 페이지 수
+    const [isLastPage, setIsLastPage] = useState(false);
+    const [isCommentLoading, setIsCommentLoading] = useState(false);
+    const observer = useRef();
 
     // 댓글 수정
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -163,18 +172,103 @@ const ArticleView = () => {
     useEffect(() => {
         if (!id) return;
 
+        // 댓글 초기화
+        setComments([]);
+        setCommentPage(0);
+        setCommentTotalPages(0);
+        setIsLastPage(false);
+
         // 게시글 불러오기
         getArticleApi(id)
             .then(res => res.data.success && setArticle(res.data.data))
             .catch(console.error);
 
-        // 댓글 불러오기
-        getCommentList(id)
+        // 모바일이면 1페이지부터 누적, 웹이면 현재 페이지 덮어쓰기
+        if (isMobile) {
+            // 1페이지만 가져오기
+            getCommentList(id, 0, commentPageSize)
+                .then(res => {
+                    if (res.data.success) {
+                        setComments(res.data.data.content);
+                        setCommentPage(res.data.data.number);
+                        setCommentTotalPages(res.data.data.totalPages);
+                        setIsLastPage(res.data.data.last);
+                    }
+                });
+        } else {
+            // 웹: 현재 페이지에 맞춰서 덮어쓰기
+            getCommentList(id, commentPage, commentPageSize)
+                .then(res => {
+                    if (res.data.success) {
+                        setComments(res.data.data.content);
+                        setCommentPage(res.data.data.number);
+                        setCommentTotalPages(res.data.data.totalPages);
+                        setIsLastPage(res.data.data.last);
+                    }
+                });
+        }
+        // isMobile이 바뀔 때마다 실행
+    }, [isMobile, id]);
+
+    const fetchComments = (page = 0) => {
+        getCommentList(id, page, commentPageSize)
             .then(res => {
-                if (res.data.success) setComments(res.data.data);
+                if (res.data.success) {
+                    setComments(res.data.data.content);
+                    setCommentPage(res.data.data.number);
+                    setCommentTotalPages(res.data.data.totalPages);
+                    setIsLastPage(res.data.data.last);
+                }
             })
             .catch(console.error);
-    }, [id]);
+    };
+
+    const refreshComments = () => {
+        setComments([]);
+        setCommentPage(0);
+        setCommentTotalPages(0);
+        getCommentList(id, 0, commentPageSize)
+            .then(res => {
+                if (res.data.success) {
+                    setComments(res.data.data.content);
+                    setCommentPage(res.data.data.number);
+                    setCommentTotalPages(res.data.data.totalPages);
+                    setIsLastPage(res.data.data.last);
+                }
+            });
+    };
+
+    const handleCommentPageChange = (page) => {
+        fetchComments(page);
+    };
+
+    const lastCommentRef = useCallback(node => {
+        if (!isMobile) return; // PC에서는 무시
+        if (isCommentLoading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new window.IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !isLastPage) {
+                loadMoreComments();
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [isMobile, isCommentLoading, isLastPage]);
+
+    const loadMoreComments = async () => {
+        if (isCommentLoading || isLastPage) return; // ★ 추가!
+        setIsCommentLoading(true);
+        try {
+            const res = await getCommentList(id, commentPage + 1, commentPageSize);
+            if (res.data.success) {
+                setComments(prev => [...prev, ...res.data.data.content]);
+                setCommentPage(res.data.data.number);
+                setCommentTotalPages(res.data.data.totalPages);
+                setIsLastPage(res.data.data.last);
+            }
+        } finally {
+            setIsCommentLoading(false);
+        }
+    };
 
     // 좋아요 클릭 이벤트
     const handleLikeClick = async () => {
@@ -218,8 +312,7 @@ const ArticleView = () => {
             const res = await postComment(id, content);
             if (res.data.success) {
                 // 등록 후 댓글 목록 새로고침
-                const listRes = await getCommentList(id);
-                if (listRes.data.success) setComments(listRes.data.data);
+                refreshComments();
                 getArticleApi(id)
                     .then(res => res.data.success && setArticle(res.data.data));
             } else {
@@ -238,9 +331,8 @@ const ArticleView = () => {
             const res = await putComment(id, newContent, article.id);
             if (res.data.success) {
                 // 성공 시 댓글 목록 새로고침
-                const listRes = await getCommentList(article.id);
-                if (listRes.data.success) setComments(listRes.data.data);
                 setEditingCommentId(null);
+                refreshComments();
                 getArticleApi(article.id)
                     .then(res => res.data.success && setArticle(res.data.data));
             } else {
@@ -271,8 +363,7 @@ const ArticleView = () => {
             const res = await deleteComment(commentToDelete);
             if (res.data.success) {
                 // 삭제 후 목록 새로고침
-                const listRes = await getCommentList(article.id);
-                if (listRes.data.success) setComments(listRes.data.data);
+                refreshComments();
                 getArticleApi(article.id)
                     .then(res => res.data.success && setArticle(res.data.data));
             } else {
@@ -378,22 +469,44 @@ const ArticleView = () => {
                     {comments.length === 0 ? (
                         <div style={{ color: "#999", padding: "16px 0" }}>댓글이 없습니다.</div>
                     ) : (
-                        comments.map(c => (
-                            <CommentListItem
-                                key={c.id}
-                                comment={{
-                                    ...c,
-                                    createdAt: c.createAt
-                                }}
-                                isMine={c.myComment}
-                                editing={editingCommentId === c.id}
-                                onDelete={handleDeleteClick}
-                                onReport={() => {/* 신고 구현 */}}
-                                onEdit={handleEditClick}
-                                onEditComplete={handleEditComplete}
-                                onEditCancel={handleEditCancel}
+                        comments.map((c, idx) => {
+                            const isLast = isMobile && idx === comments.length - 1;
+                            return (
+                                <CommentListItem
+                                    key={c.id}
+                                    ref={isLast ? lastCommentRef : undefined}
+                                    comment={{
+                                        ...c,
+                                        createdAt: c.createAt
+                                    }}
+                                    isMine={c.myComment}
+                                    editing={editingCommentId === c.id}
+                                    onDelete={handleDeleteClick}
+                                    onReport={() => {/* 신고 구현 */}}
+                                    onEdit={handleEditClick}
+                                    onEditComplete={handleEditComplete}
+                                    onEditCancel={handleEditCancel}
+                                />
+                            );
+                        })
+                    )}
+                    {isMobile && isCommentLoading && (
+                        <div style={{ textAlign: "center", color: "#aaa", padding: "12px" }}>댓글 불러오는 중...</div>
+                    )}
+                    {/* PC에서는 기존 페이지네이션 버튼 */}
+                    {!isMobile && commentTotalPages > 1 && (
+                        <div style={{marginTop: "24px", display: "flex", justifyContent: "center"}}>
+                            <Pagination
+                                count={commentTotalPages}
+                                page={commentPage + 1}
+                                onChange={(e, value) => handleCommentPageChange(value - 1)}
+                                siblingCount={1}
+                                boundaryCount={1}
+                                showFirstButton
+                                showLastButton
+                                color="primary"
                             />
-                        ))
+                        </div>
                     )}
                 </div>
             </Container>
