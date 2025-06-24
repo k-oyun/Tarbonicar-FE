@@ -40,6 +40,10 @@ export const memberApi = () => {
     });
   };
 
+  const userInfoGet = async () => {
+    return await axios.get("/api/v1/member/user-info");
+  };
+
   // 비밀번호 재설정 링크 요청
   const passwordResetEmailRequest = async ({ email }) => {
     return await axios.post("/api/v1/password-reset/email-request", {
@@ -62,7 +66,7 @@ export const memberApi = () => {
     });
   };
 
-  return { signup, login, kakaoLogin, checkEmail, passwordResetEmailRequest, passwordResetEmailConfirm, passwordReset };
+  return { signup, login, kakaoLogin, checkEmail, passwordResetEmailRequest, passwordResetEmailConfirm, passwordReset, userInfoGet };
 };
 
 export default memberApi;

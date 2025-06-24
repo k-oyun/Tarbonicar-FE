@@ -8,7 +8,6 @@ import SelectBox from "../components/SelectBox";
 import Header from "../components/Header";
 import { useMediaQuery } from "react-responsive";
 import useMainApi from "../api/main";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const MainContainer = styled.div`
@@ -167,28 +166,15 @@ const Main = () => {
       if (reviewRef.current) observer.unobserve(reviewRef.current);
     };
   }, []);
-  // const { carTypeGet, carNameGet, carAgeGet } = useMainApi();
+  const { carTypeGet, carNameGet, carAgeGet } = useMainApi();
 
-  const carTypeGet = async () => {
-    const url = "http://localhost:8080/api/v1/category/search/cartype";
-    const headers = {
-      "Content-Type": "application/json",
-    };
-
-    try {
-      const response = await axios.get(url, { headers });
-      return response.data;
-    } catch (error) {
-      console.error("차종 GET:", error);
-    }
-  };
   useEffect(() => {
     const typeGet = async () => {
       const res = await carTypeGet();
-      if (res && Array.isArray(res.data)) {
+      if (res && Array.isArray(res.data.data)) {
         const carTypeList = [
           { id: 0, value: "all", label: "전체보기" },
-          ...res.data.map((item) => ({
+          ...res.data.data.map((item) => ({
             id: item.id,
             value: item.carType,
             label: item.carType,
@@ -199,20 +185,8 @@ const Main = () => {
     };
 
     typeGet();
+    console.log("dasdas", carType);
   }, []);
-  const carNameGet = async () => {
-    const url = `http://localhost:8080/api/v1/category/search/carname?carType=${selectedType}`;
-    const headers = {
-      "Content-Type": "application/json",
-    };
-
-    try {
-      const response = await axios.get(url, { headers });
-      return response.data;
-    } catch (error) {
-      console.error("차 이름 GET:", error);
-    }
-  };
 
   useEffect(() => {
     if (selectedType === "all") {
@@ -223,11 +197,11 @@ const Main = () => {
     }
     if (isBtnPressed) {
       const nameGet = async () => {
-        const res = await carNameGet();
-        if (res && Array.isArray(res.data)) {
+        const res = await carNameGet(selectedType);
+        if (res && Array.isArray(res.data.data)) {
           const carNameList = [
             { id: 0, value: "all", label: "전체보기" },
-            ...res.data.map((item) => ({
+            ...res.data.data.map((item) => ({
               id: item.id,
               value: item.carName,
               label: item.carName,
@@ -241,28 +215,14 @@ const Main = () => {
     }
   }, [selectedType]);
 
-  const carAgeGet = async () => {
-    const url = `http://localhost:8080/api/v1/category/search/home/carage?carType=${selectedType}&carName=${selectedModel}`;
-    const headers = {
-      "Content-Type": "application/json",
-    };
-
-    try {
-      const response = await axios.get(url, { headers });
-      return response.data;
-    } catch (error) {
-      console.error("차 연식 GET:", error);
-    }
-  };
-
   useEffect(() => {
     if (isBtnPressed) {
       const ageGet = async () => {
-        const res = await carAgeGet();
-        if (res && Array.isArray(res.data)) {
+        const res = await carAgeGet(selectedType, selectedModel);
+        if (res && Array.isArray(res.data.data)) {
           const carAgeList = [
             { id: 0, value: "all", label: "전체보기" },
-            ...res.data.map((item) => ({
+            ...res.data.data.map((item) => ({
               id: item.id,
               value: item.carAge,
               label: item.carAge,
