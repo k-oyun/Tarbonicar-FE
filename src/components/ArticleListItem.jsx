@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { timeForToday } from "../utils/timeForToday.js";
-import defaultImage from "../assets/imgs/Sahuru.png";
+import defaultImage from "../assets/Svgs/default_image.svg";
 import like from "../assets/Svgs/like.svg";
 import unlike from "../assets/Svgs/unlike.svg";
 import comment from "../assets/Svgs/comment.svg";
@@ -23,7 +23,9 @@ const Card = styled.div`
 const Image = styled.img`
   width: 100%;
   height: 160px;
-  object-fit: cover;
+  object-fit: ${({ $isDefault }) => ($isDefault ? "contain" : "cover")};
+  background: #f1f3f6;
+  display: block;
 `;
 
 const IconImage = styled.img`
@@ -67,6 +69,7 @@ const Text = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.4;
+  min-height: 2.8em;
 `;
 
 const Bottom = styled.div`
@@ -91,6 +94,17 @@ const ArticleListItem = ({ article }) => {
     navigate(`/article-view?id=${article.id}`);
   };
 
+  // 본문에서 첫 번째 이미지 src 추출
+  const getFirstImageSrc = (html) => {
+    if (!html) return null;
+    const clean = DOMPurify.sanitize(html); // XSS 방지
+    const doc = new DOMParser().parseFromString(clean, "text/html");
+    const img = doc.querySelector("img");
+    return img?.getAttribute("src") || null;
+  };
+
+  const firstImg = getFirstImageSrc(article.content);
+
   const stripHtml = (html) => {
     // 태그만 제거하고, 텍스트만 남김
     const div = document.createElement("div");
@@ -100,7 +114,11 @@ const ArticleListItem = ({ article }) => {
 
   return (
     <Card onClick={handleClick}>
-      <Image src={article.imageUrl || defaultImage} alt="차량 이미지" />
+      <Image
+        src={firstImg || defaultImage}
+        alt="차량 이미지"
+        $isDefault={!firstImg}
+      />
       <Content>
         <TagRow>
           <Tag>#{article.carName || "차량"}</Tag>

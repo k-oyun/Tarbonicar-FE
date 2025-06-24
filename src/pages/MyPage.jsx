@@ -283,31 +283,44 @@ const MyPage = () => {
     query: "(max-width:767px)",
   });
 
-  useEffect(() => {
-    const getUserInfo = async () => {
-      try {
-        const res = await axios.get("/api/v1/member/user-info");
-        console.log("📥 유저 정보 응답:", res.data); // 이 부분 추가
-        setCurNickname(res.data.data.nickname);
-        setUserImg(res.data.data.profileImage);
-      } catch (error) {
-        console.error("유저 정보 가져오기 실패:", error);
-      }
+  const userInfoGet = async () => {
+    const url = "http://localhost:8080/api/v1/member/user-info";
+
+    const headers = {
+      Authorization:
+        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDczNDUxOX0.ijKYuqhCowJpjNI7QEgOWOpcFzqhTkC2jFMvi4UfUtacDTxfzHaNgvXdsZB3iyO6JBScKe53ctzKgcYIXfFHgA",
+      "Content-Type": "application/json",
     };
 
-    getUserInfo();
+    try {
+      const response = await axios.get(url, { headers });
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error("GET:", error);
+    }
+  };
+  useEffect(() => {
+    const InfoGet = async () => {
+      const res = await userInfoGet();
+      setNickname(res.data.nickname);
+      setUserImg(res.data.profileImage);
+      console.log(res);
+    };
+
+    InfoGet();
   }, []);
 
   useEffect(() => {
     console.log(isMobile);
   }, [isMobile]);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "accessToken",
-      "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDcyNzU3NX0.FSGEpLOSCHYeLdB8Sl1AKxls0yQKftb9BXOGzLwVeutDSn3HYw9b9p3-ijBjh6tD1IZHXsbAM5U1BgyY5YhQhw"
-    );
-  }, []);
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     "accessToken",
+  //     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDcyNzU3NX0.FSGEpLOSCHYeLdB8Sl1AKxls0yQKftb9BXOGzLwVeutDSn3HYw9b9p3-ijBjh6tD1IZHXsbAM5U1BgyY5YhQhw"
+  //   );
+  // }, []);
 
   const handleNicknameChange = async () => {
     try {

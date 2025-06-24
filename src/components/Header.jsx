@@ -130,12 +130,20 @@ const Header = ({ isReviewVisible }) => {
     naviagate("/");
   };
 
+  const onClickLoginText = () => {
+    naviagate("/login");
+  };
+
+  const onClickMypage = () => {
+    naviagate("/mypage");
+  };
+
   const userInfoGet = async () => {
     const url = "http://localhost:8080/api/v1/member/user-info";
 
     const headers = {
       Authorization:
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGRiczEyMDhAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDY0NzE3MH0.U5LIu9sLVKLanexa3J5GPWEI6rZRHIk8X8QDjQg-q1agGt_wThDhkrlcTFiH3qca5Y_KA6FfIRNQfI-8c9e33Q",
+        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDczNDUxOX0.ijKYuqhCowJpjNI7QEgOWOpcFzqhTkC2jFMvi4UfUtacDTxfzHaNgvXdsZB3iyO6JBScKe53ctzKgcYIXfFHgA",
       "Content-Type": "application/json",
     };
 
@@ -177,7 +185,11 @@ const Header = ({ isReviewVisible }) => {
 
         <UserInfoContainer>
           {nickname === "" ? (
-            <LoginBtn $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+            <LoginBtn
+              $ismobile={isMobile}
+              $isReviewVisible={isReviewVisible}
+              onClick={onClickLoginText}
+            >
               로그인하러 가기
             </LoginBtn>
           ) : (
