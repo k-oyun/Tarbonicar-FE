@@ -3,8 +3,14 @@ import styled from "styled-components";
 import sahuruImg from "../assets/imgs/Sahuru.png";
 import { useMediaQuery } from "react-responsive";
 import { useNavigate } from "react-router-dom";
-import { updateNickname, updatePassword } from "../api/UpdateMemberInfo";
+import {
+  updateNickname,
+  updatePassword,
+  updateProfileImage,
+  deleteMember,
+} from "../api/UpdateMemberInfo";
 import ConfirmDialog from "../components/ConfirmDialog";
+import axios from "../api/AxiosInstance";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -263,7 +269,7 @@ const ActionButton = styled.div`
 
 // const SideMenu = styled.div``;
 const MyPage = () => {
-  const [curNickname, setCurNickname] = useState("사후르");
+  const [curNickname, setCurNickname] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -273,17 +279,22 @@ const MyPage = () => {
 
   const navigate = useNavigate();
 
-  const handleWithdraw = () => {
-    console.log("회원 탈퇴");
-    setIsModalOpen(false);
-  };
-
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
 
   useEffect(() => {
-    setUserImg(sahuruImg);
+    const getUserInfo = async () => {
+      try {
+        const res = await axios.get("/api/v1/member/user-info");
+        setCurNickname(res.data.data.nickname);
+        setUserImg(res.data.data.profileImage);
+      } catch (error) {
+        console.error("유저 정보 가져오기 실패:", error);
+      }
+    };
+
+    getUserInfo();
   }, []);
 
   useEffect(() => {
@@ -313,6 +324,30 @@ const MyPage = () => {
     }
   };
 
+  const handleImageChange = async (file) => {
+    try {
+      const imageUrl = await updateProfileImage(file);
+      setUserImg(imageUrl);
+      alert("프로필 이미지가 변경되었습니다.");
+    } catch (err) {
+      alert("이미지 변경 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteMember();
+      alert("회원 탈퇴가 완료되었습니다.");
+      // localStorage.removeItem("accessToken"); // 토큰 삭제
+      navigate("/"); // 홈 또는 로그인 페이지로 이동
+    } catch (e) {
+      console.error("회원 탈퇴 실패:", e);
+      alert("회원 탈퇴 중 오류가 발생했습니다.");
+    } finally {
+      setIsModalOpen(false);
+    }
+  };
+
   const renderMainContent = () => {
     switch (selectedMenu) {
       case "프로필":
@@ -323,7 +358,10 @@ const MyPage = () => {
               <SubText>등록한 계정 정보를 수정하실 수 있습니다.</SubText>
               <BorderLine />
               <ImageUploadWrapper>
-                <ProfileImage src={userImg} alt="프로필 이미지" />
+                <ProfileImage
+                  src={userImg || "../assets/imgs/Sahuru.png"}
+                  alt="프로필 이미지"
+                />
                 <PlusIcon>+</PlusIcon>
                 <HiddenInput
                   type="file"
@@ -342,7 +380,7 @@ const MyPage = () => {
               </ImageUploadWrapper>
               <ButtonGroup>
                 <CancelButton>취소</CancelButton>
-                <ActionButton>변경</ActionButton>
+                <ActionButton onClick={handleImageChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
           </>
@@ -446,7 +484,7 @@ const MyPage = () => {
               title="회원 탈퇴 하시겠습니까?"
               message="회원 탈퇴 할 경우 작성한 게시판 내용은 복구할 수 없습니다."
               onCancel={() => setIsModalOpen(false)}
-              onConfirm={handleWithdraw}
+              onConfirm={handleDelete}
               isRedButton={true}
             />
             <MenuItem $ismobile={isMobile} onClick={() => setIsModalOpen(true)}>

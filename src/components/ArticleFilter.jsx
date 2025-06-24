@@ -1,11 +1,11 @@
 import React, {forwardRef, useEffect, useRef, useState} from "react";
-import { categoryApi } from "../../api/CategoryApi.js";
+import { categoryApi } from "../api/categoryApi.js";
 import * as Accordion from "@radix-ui/react-accordion";
 import {ChevronDownIcon} from "@radix-ui/react-icons";
 import styled, {keyframes} from "styled-components";
-import refresh from "../../assets/Svgs/refresh.svg";
+import refresh from "../assets/Svgs/refresh.svg";
 import CheckboxGroup from "./CheckboxGroup.jsx";
-import {DropdownBox} from "../DropdownBox.jsx";
+import {DropdownBox} from "./DropdownBox.jsx";
 
 const FilterContainer = styled.div`
     display: flex;
@@ -99,19 +99,19 @@ const AccordionTrigger = styled(Accordion.Trigger)`
 
 const slideDown = keyframes`
     from {
-        height: 0;
+        max-height: 0;
     }
     to {
-        height: var(--radix-accordion-content-height);
+        max-height: var(--radix-accordion-content-height);
     }
 `;
 
 const slideUp = keyframes`
     from {
-        height: var(--radix-accordion-content-height);
+        max-height: var(--radix-accordion-content-height);
     }
     to {
-        height: 0;
+        max-height: 0;
     }
 `;
 
@@ -174,7 +174,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 const ArticleFilter = ({ filters, setFilters }) => {
-    const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
+    const { carTypeListApi, carNameListApi, carAgeListHomeApi } = categoryApi();
     const [openItems, setOpenItems] = useState(["cartype", "carname", "carage", "category"]);
 
     const [carTypeList, setCarTypeList] = useState([]);
@@ -232,7 +232,7 @@ const ArticleFilter = ({ filters, setFilters }) => {
         if (filters.carType && filters.carNames.length > 0) {
             const carTypeParam = filters.carType;
             const carNameParam = filters.carNames[0];
-            carAgeListApi(carTypeParam, carNameParam)
+            carAgeListHomeApi(carTypeParam, carNameParam)
                 .then(res => setCarAgeList(res.data.data || []))
                 .catch(console.error);
 
@@ -245,6 +245,8 @@ const ArticleFilter = ({ filters, setFilters }) => {
                 setStartYear("");
                 setEndYear("");
             }
+
+            setOpenItems(prev => [...new Set([...prev, "carage"])]);
         } else {
             setCarAgeList([]);
             setFilters(prev => ({

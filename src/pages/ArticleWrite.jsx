@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -20,9 +21,11 @@ import 'ckeditor5/ckeditor5.css';
 
 import styled, { createGlobalStyle } from "styled-components";
 import { useMediaQuery } from "react-responsive";
-import useArticleWriteApi from "../api/articleWrite.js";
 import SelectBox      from "../components/SelectBox";
 import ConfirmDialog  from "../components/ConfirmDialog";
+import {articleApi} from "../api/articleApi.js";
+import {categoryApi} from "../api/categoryApi.js";
+import {imageUploadApi} from "../api/imageUploadApi.js";
 
 const HEADER_DESKTOP = 80;
 const HEADER_MOBILE  = 60;
@@ -77,7 +80,9 @@ const EditorWrapper = styled.div`
 `;
 
 export default function ArticleWrite() {
-    const api = useArticleWriteApi();
+    const { postArticleApi } = articleApi();
+    const { postImageUploadApi } = imageUploadApi();
+    const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
 
     const editorRef = useRef(null);
     const [ready, setReady] = useState(false);
@@ -121,7 +126,7 @@ export default function ArticleWrite() {
         upload(){
             return this.loader.file.then(file=>{
                 const fd=new FormData(); fd.append('image',file);
-                return api.imageUpload(fd).then(res=>{
+                return postImageUploadApi(fd).then(res=>{
                     const j=res.data; if(!j.success) return Promise.reject(j.message);
                     return {default:j.data};
                 });
@@ -165,16 +170,16 @@ export default function ArticleWrite() {
     },[ready,toolbarOffset]);
 
     // 데이터 로딩
-    useEffect(()=>{ api.carTypeGet().then(r=>setCarTypes(r.data.data||[])).catch(console.error); },[]);
+    useEffect(()=>{ carTypeListApi().then(r => setCarTypes(r.data.data || [] )) },[]);
     useEffect(()=>{
         if(!selectedCarType){
             setCarNames([]); setSelectedCarName(''); setCarAges([]); setSelectedCarAge(''); return;
         }
-        api.carNameGet(selectedCarType).then(r=>setCarNames(r.data.data||[])).catch(console.error);
+        carNameListApi(selectedCarType).then(r=>setCarNames(r.data.data||[])).catch(console.error);
     },[selectedCarType]);
     useEffect(()=>{
         if(!selectedCarName){ setCarAges([]); setSelectedCarAge(''); return; }
-        api.carAgeGet(selectedCarName).then(r=>setCarAges(r.data.data||[])).catch(console.error);
+        carAgeListApi(selectedCarName).then(r=>setCarAges(r.data.data||[])).catch(console.error);
     },[selectedCarName]);
 
     // 모달 호출 헬퍼
@@ -201,7 +206,7 @@ export default function ArticleWrite() {
             openDialog({title:"내용을 입력하세요"});                                        return;
         }
 
-        api.articleWrite({
+        postArticleApi({
             title,
             content,
             articleType: category,

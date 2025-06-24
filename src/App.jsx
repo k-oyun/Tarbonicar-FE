@@ -1,26 +1,40 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
+import RegisterHeader from "./components/RegisterHeader.jsx";
 import ModalSample from "./pages/ModalSample.jsx";
 import Main from "./pages/Main.jsx";
 import ArticleWrite from "./pages/ArticleWrite.jsx";
 import ArticleList from "./pages/ArticleList.jsx";
 import ArticleView from "./pages/ArticleView.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import MyArticle from "./pages/MyArticle.jsx";
+
+function HeaderSelector() {
+  const location = useLocation();
+  const path = location.pathname;
+
+  if (path === "/signup") return <RegisterHeader />;
+  if (path === "/login") return null;
+  return <Header />;
+}
 
 function App() {
   return (
     // <ModalSample/>
     <BrowserRouter>
-      <Header />
+      <HeaderSelector />
       <Routes>
         <Route Component={Main} path="/" />
-        <Route path="/my-page" element={<MyPage />} />
-        <Route path="/my-article" element={<MyArticle />} />
         <Route path="/article-write" element={<ArticleWrite />} />
         <Route path="/article-list" element={<ArticleList />} />
         <Route path="/article-view" element={<ArticleView />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/my-page" element={<MyPage />} />
+        <Route path="/my-article" element={<MyArticle />} />
       </Routes>
     </BrowserRouter>
   );
