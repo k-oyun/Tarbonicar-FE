@@ -233,7 +233,7 @@ const Header = ({
               </HeaderText>
               <UserImageContainer
                 $ismobile={isMobile}
-                $image={userImg ? profileImage : profileIcon}
+                $image={userImg ? userImg : profileIcon}
                 onClick={handlePopup}
               />
             </>
