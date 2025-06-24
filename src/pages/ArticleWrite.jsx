@@ -233,6 +233,19 @@ export default function ArticleWrite() {
         });
     };
 
+    // 비로그인 상태 체크
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+            openDialog({
+                title: "오류",
+                message: "로그인 후 이용이 가능합니다.",
+                isRedButton: true,
+                onConfirm: () => window.location.replace("/login")
+            });
+        }
+    }, []);
+
     // 작성/수정 처리
     const handleSubmit = () => {
         if(!title.trim())              { openDialog({title:"제목을 입력하세요"});          return; }
