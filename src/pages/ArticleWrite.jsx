@@ -256,7 +256,7 @@ export default function ArticleWrite() {
                 .then(() => {
                     openDialog({
                         title:"게시글이 수정되었습니다.",
-                        onConfirm: ()=>window.location.href=`/article-view?id=${articleId}`
+                        onConfirm: ()=>window.location.replace(`/article-view?id=${articleId}`)
                     });
                 })
                 .catch(()=>openDialog({
@@ -270,7 +270,7 @@ export default function ArticleWrite() {
                     const newId = res.data?.data?.id ?? res.data?.data;
                     openDialog({
                         title:"게시글이 등록되었습니다.",
-                        onConfirm:()=>window.location.href=`/article-view?id=${newId}`
+                        onConfirm:()=>window.location.replace(`/article-view?id=${newId}`)
                     });
                 })
                 .catch(()=>openDialog({
