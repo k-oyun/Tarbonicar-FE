@@ -1,15 +1,9 @@
 import axios from "./AxiosInstance";
 
-export const updateNickname = async (newNickname) => {
-  try {
-    const res = await axios.put("/api/v1/member/nickname", {
-      nickname: newNickname,
-    });
-    return res.data;
-  } catch (err) {
-    console.error("닉네임 변경 실패", err);
-    throw err;
-  }
+export const updateNickname = async (nickname) => {
+  return await axios.put("/api/v1/member/nickname", {
+    nickname,
+  });
 };
 
 export const updatePassword = async (password, confirmPassword) => {

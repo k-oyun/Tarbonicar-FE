@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import styled from "styled-components";
+import { articleApi } from "../api/articleApi";
 import ArticleListItem from "../components/ArticleListItem.jsx";
 import SortDropdown from "../components/SortDropdown";
 
 const Container = styled.div`
-  /* padding-top: 80px; 헤더 높이만큼 */
-  /* max-width: 900px; */
   margin: 0 auto;
   font-family: "Noto Sans KR", sans-serif;
   color: #333;
@@ -21,7 +20,6 @@ const BreadCrumb = styled.div`
   padding-left: 20px;
   a {
     color: #666;
-    /* color: #1d75bd; */
     text-decoration: none;
     cursor: pointer;
   }
@@ -46,98 +44,100 @@ const Subtitle = styled.p`
 `;
 
 const Content = styled.div`
-  padding-top: 40px;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding: 40px 30px;
   max-width: 1200px;
   margin: 0 auto;
-  overflow: visible;
 `;
 
-// 필터 + 게시글 영역
 const Layout = styled.div`
   display: flex;
-  align-items: flex-start;
-  margin-bottom: 50px;
-  gap: 32px;
   flex-direction: ${(props) => (props.$ismobile ? "column" : "row")};
+  align-items: flex-start;
+  gap: 32px;
 `;
 
-// 오른쪽 콘텐츠 전체 (작성 버튼 + 카드 리스트)
 const ContentArea = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  @media (max-width: 767px) {
-    width: 100%;
-  }
 `;
 
-// 버튼 오른쪽 정렬용 컨테이너
 const SortWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-bottom: 12px;
 `;
 
-// 카드 리스트 영역
 const CardGrid = styled.div`
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   cursor: pointer;
-
-  @media (max-width: 767px) {
-    width: 100%;
-  }
 `;
 
 const sortOptions = [
-  { label: "최근 작성 순", value: "latest" },
-  { label: "마지막 작성 순", value: "updated" },
-  { label: "좋아요 순", value: "likes" },
+  { label: "최근 작성 순", value: "RECENT" },
+  { label: "마지막 작성 순", value: "UPDATED" },
+  { label: "좋아요 순", value: "LIKES" },
 ];
 
 const MyArticle = () => {
-  const isMobile = useMediaQuery({
-    query: "(max-width:767px)",
-  });
+  const isMobile = useMediaQuery({ query: "(max-width:767px)" });
+  const { getMyArticleListApi } = articleApi();
 
-  const [sortType, setSortType] = useState("latest");
+  const [sortType, setSortType] = useState("RECENT");
+  const [articleList, setArticleList] = useState([]);
+
+  useEffect(() => {
+    const fetchMyArticles = async () => {
+      try {
+        const res = await getMyArticleListApi(sortType);
+        setArticleList(res.data.data);
+      } catch (err) {
+        console.error("내 글 목록 조회 실패:", err);
+        setArticleList([]);
+      }
+    };
+
+    fetchMyArticles();
+  }, [sortType]); // 🔄 sortType이 바뀔 때마다 다시 요청
+
   return (
-    <>
-      <>
-        <Container>
-          <BreadCrumb $ismobile={isMobile}>
-            홈 &gt; <a href="/my-page"> 마이페이지 &gt;</a>
-            <a href="/my-article"> 내가 작성한 글</a>
-          </BreadCrumb>
-          <TitleSection>
-            <Title>내가 작성한 글</Title>
-            <Subtitle>이용 중인 타보니까를 어쩌구 저쩌구 ㄴㅇㅁㅇㄴ</Subtitle>
-          </TitleSection>
-          <Content $ismobile={isMobile}>
-            <Layout $ismobile={isMobile}>
-              {/* 오른쪽 (또는 아래쪽) 콘텐츠 */}
-              <ContentArea>
-                <div style={{ textAlign: "right", marginBottom: "20px" }}>
-                  <SortDropdown
-                    options={sortOptions}
-                    value={sortType}
-                    onChange={setSortType}
-                  />
-                </div>
-                {/* <CardGrid>
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <ArticleListItem key={i} />
-                  ))}
-                </CardGrid> */}
-              </ContentArea>
-            </Layout>
-          </Content>
-        </Container>
-      </>
-    </>
+    <Container>
+      <BreadCrumb $ismobile={isMobile}>
+        홈 &gt; <a href="/my-page"> 마이페이지 &gt;</a>
+        <a href="/my-article"> 내가 작성한 글</a>
+      </BreadCrumb>
+
+      <TitleSection>
+        <Title>내가 작성한 글</Title>
+        <Subtitle>회원님이 등록한 게시글 목록입니다.</Subtitle>
+      </TitleSection>
+
+      <Content $ismobile={isMobile}>
+        <Layout $ismobile={isMobile}>
+          <ContentArea>
+            <SortWrapper>
+              <SortDropdown
+                options={sortOptions}
+                value={sortType}
+                onChange={setSortType}
+                $isMobile={isMobile}
+              />
+            </SortWrapper>
+            <CardGrid>
+              {articleList.length > 0 ? (
+                articleList.map((article, i) => (
+                  <ArticleListItem key={article.id || i} article={article} />
+                ))
+              ) : (
+                <div>작성한 글이 없습니다.</div>
+              )}
+            </CardGrid>
+          </ContentArea>
+        </Layout>
+      </Content>
+    </Container>
   );
 };
 

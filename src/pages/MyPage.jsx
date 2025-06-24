@@ -11,6 +11,8 @@ import {
 } from "../api/UpdateMemberInfo";
 import ConfirmDialog from "../components/ConfirmDialog";
 import axios from "../api/AxiosInstance";
+import { useUser } from "../context/UserContext";
+import profileIcon from "../assets/imgs/profileIcon.png";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -269,87 +271,63 @@ const ActionButton = styled.div`
 
 // const SideMenu = styled.div``;
 const MyPage = () => {
-  const [curNickname, setCurNickname] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [userImg, setUserImg] = useState("");
   const [selectedMenu, setSelectedMenu] = useState("프로필");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
 
-  const userInfoGet = async () => {
-    const url = "http://localhost:8080/api/v1/member/user-info";
-
-    const headers = {
-      Authorization:
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDczNDUxOX0.ijKYuqhCowJpjNI7QEgOWOpcFzqhTkC2jFMvi4UfUtacDTxfzHaNgvXdsZB3iyO6JBScKe53ctzKgcYIXfFHgA",
-      "Content-Type": "application/json",
-    };
-
-    try {
-      const response = await axios.get(url, { headers });
-      console.log(response);
-      return response.data;
-    } catch (error) {
-      console.error("GET:", error);
-    }
-  };
-  useEffect(() => {
-    const InfoGet = async () => {
-      const res = await userInfoGet();
-      setNickname(res.data.nickname);
-      setUserImg(res.data.profileImage);
-      console.log(res);
-    };
-
-    InfoGet();
-  }, []);
-
   useEffect(() => {
     console.log(isMobile);
   }, [isMobile]);
 
-  // useEffect(() => {
-  //   localStorage.setItem(
-  //     "accessToken",
-  //     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDcyNzU3NX0.FSGEpLOSCHYeLdB8Sl1AKxls0yQKftb9BXOGzLwVeutDSn3HYw9b9p3-ijBjh6tD1IZHXsbAM5U1BgyY5YhQhw"
-  //   );
-  // }, []);
-
   const handleNicknameChange = async () => {
     try {
-      await updateNickname(nickname);
-      setCurNickname(nickname);
+      await updateNickname(nickname); // 서버에 닉네임 업데이트
+      setUser((prev) => ({ ...prev, nickname })); // Context 업데이트 → Header 자동 반영
       alert("닉네임이 변경되었습니다.");
+      navigate(0);
     } catch (e) {
-      alert("닉네임 변경 중 오류 발생");
+      alert("닉네임 변경 실패");
     }
   };
-
   const handlePasswordChange = async () => {
     if (password !== confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      alert("비밀번호 그거 아닌데? 아닌데? 아닌데? 아닌데? 응 아니야~");
+      navigate(0);
       return;
     }
     try {
       await updatePassword(password, confirmPassword);
       alert("비밀번호가 변경되었습니다.");
+      navigate(0);
     } catch (e) {
       alert("비밀번호 변경 중 오류 발생");
     }
   };
 
-  const handleImageChange = async (file) => {
+  const handleImageChange = async () => {
+    if (!selectedFile) {
+      alert("이미지를 먼저 선택해주세요.");
+      return;
+    }
+
     try {
-      const imageUrl = await updateProfileImage(file);
-      setUserImg(imageUrl);
+      const imageUrl = await updateProfileImage(selectedFile); // 서버 업로드
+      setUserImg(imageUrl); // 미리보기 이미지 업데이트
+      setUser((prev) => ({ ...prev, profileImage: imageUrl })); // Context도 반영
       alert("프로필 이미지가 변경되었습니다.");
+      setSelectedFile(null); // 상태 초기화
+      navigate(0);
     } catch (err) {
       alert("이미지 변경 중 오류가 발생했습니다.");
     }
@@ -359,7 +337,7 @@ const MyPage = () => {
     try {
       await deleteMember();
       alert("회원 탈퇴가 완료되었습니다.");
-      // localStorage.removeItem("accessToken"); // 토큰 삭제
+      localStorage.removeItem("accessToken"); // 토큰 삭제
       navigate("/"); // 홈 또는 로그인 페이지로 이동
     } catch (e) {
       console.error("회원 탈퇴 실패:", e);
@@ -380,8 +358,20 @@ const MyPage = () => {
               <BorderLine />
               <ImageUploadWrapper>
                 <ProfileImage
-                  src={userImg || "../assets/imgs/Sahuru.png"}
+                  src={
+                    userImg && userImg !== "null" && userImg.trim() !== ""
+                      ? userImg
+                      : user.profileImage &&
+                        user.profileImage !== "null" &&
+                        user.profileImage.trim() !== ""
+                      ? user.profileImage
+                      : profileIcon
+                  }
                   alt="프로필 이미지"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = profileIcon;
+                  }}
                 />
                 <PlusIcon>+</PlusIcon>
                 <HiddenInput
@@ -390,10 +380,10 @@ const MyPage = () => {
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      handleImageChange(file);
+                      setSelectedFile(file); // ✅ 여기서만 저장
                       const reader = new FileReader();
                       reader.onloadend = () => {
-                        setUserImg(reader.result);
+                        setUserImg(reader.result); // 즉시 미리보기만
                       };
                       reader.readAsDataURL(file);
                     }
@@ -515,7 +505,7 @@ const MyPage = () => {
           </SideMenu>
           <MainSection>
             <h3>
-              <strong>{curNickname}</strong>님, 안녕하세요!
+              <strong>{user.nickname}</strong>님, 안녕하세요!
             </h3>
             <StatsBar>
               <StatsItem

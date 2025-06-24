@@ -9,6 +9,7 @@ import { fadeDown } from "../styles/animation";
 import { useMediaQuery } from "react-responsive";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -126,6 +127,7 @@ const Header = ({
   logoColor,
   border,
 }) => {
+  const { user, setUser } = useUser();
   const naviagate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [userImg, setUserImg] = useState("");
@@ -153,7 +155,7 @@ const Header = ({
 
     const headers = {
       Authorization:
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDczNDUxOX0.ijKYuqhCowJpjNI7QEgOWOpcFzqhTkC2jFMvi4UfUtacDTxfzHaNgvXdsZB3iyO6JBScKe53ctzKgcYIXfFHgA",
+        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmMxMkBnbWFpbC5jb20iLCJhdXRoIjoiUk9MRV9VU0VSIiwiZXhwIjoxNzUwNzUzMDE3fQ.HinGvENIXHH1rqXo_Z4WYhEoREI_x1X1RIUwBiEf3KChnAFiY3xJ3zlekBZEDWVgm4YIJWNa2bBeFt-lSnE7Og",
       "Content-Type": "application/json",
     };
 
@@ -170,6 +172,10 @@ const Header = ({
       setNickname(res.data.nickname);
       setUserImg(res.data.profileImage);
       console.log(res);
+      setUser({
+        nickname: res.data.nickname,
+        profileImage: res.data.profileImage,
+      });
     };
 
     InfoGet();
@@ -219,7 +225,8 @@ const Header = ({
               </HeaderText>
               <UserImageContainer
                 $ismobile={isMobile}
-                $image={userImg ? profileImage : profileIcon}
+                // $image={userImg ? profileImage : profileIcon}
+                $image={userImg ? userImg : profileIcon}
                 onClick={handlePopup}
               />
             </>

@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import ArrowDownIcon from "../assets/imgs/arrow_down.png"; // 화살표 아이콘
+import { useMediaQuery } from "react-responsive";
 
 const Container = styled.div`
   position: relative;
   display: inline-block;
+  width: ${(props) => (props.$ismobile ? "100%" : "auto")};
 `;
 
 const Button = styled.button`
@@ -16,6 +18,7 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 4px;
+  width: ${(props) => (props.$ismobile ? "100%" : "140px")};
 `;
 
 const Dropdown = styled.ul`
@@ -30,6 +33,7 @@ const Dropdown = styled.ul`
   list-style: none;
   z-index: 1000;
   min-width: 140px;
+  width: ${(props) => (props.$ismobile ? "100%" : "140px")};
 `;
 
 const DropdownItem = styled.li`
@@ -54,6 +58,7 @@ const Arrow = styled.img`
 const SortDropdown = ({ options, value, onChange }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef();
+  const isMobile = useMediaQuery({ query: "(max-width:767px)" });
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -68,7 +73,7 @@ const SortDropdown = ({ options, value, onChange }) => {
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
-    <Container ref={ref}>
+    <Container ref={ref} $ismobile={isMobile}>
       <Button onClick={() => setOpen((prev) => !prev)}>
         {selectedLabel || "정렬"}
         <Arrow src={ArrowDownIcon} open={open} />
