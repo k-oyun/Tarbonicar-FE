@@ -101,6 +101,12 @@ const ActionButton = styled.button`
     transition:transform .2s;
     &:hover{ transform:scale(1.1); }
     img{ width:${({ $ismobile }) => ($ismobile ? "16px" : "20px")}; margin-right:5px; }
+    
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        transform: none;
+    }
 `;
 
 const ArticleControls = styled.div`
@@ -121,6 +127,8 @@ const ArticleControls = styled.div`
 
 const ArticleView = () => {
     const isMobile = useMediaQuery({ query: "(max-width:767px)" });
+    // 로그인 상태 확인
+    const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
 
     // 쿼리스트링에서 id 추출
     const id = useMemo(() => new URLSearchParams(window.location.search).get("id"), []);
@@ -326,7 +334,8 @@ const ArticleView = () => {
                     <ActionButton
                         $ismobile={isMobile}
                         $active={article.myLike}
-                        onClick={handleLikeClick}
+                        disabled={!isLoggedIn}               // 로그인 안 됐으면 비활성화
+                        onClick={handleLikeClick}             // 알림 없이 그냥 클릭 막힘
                     >
                         <img
                             src={article.myLike ? likeIcon : unlikeIcon}
