@@ -33,7 +33,14 @@ export const memberApi = () => {
     });
   };
 
-  return { signup, login, kakaoLogin };
+  // 이메일 중복 확인
+  const checkEmail = async (email) => {
+    return await axios.get("/api/v1/member/email-check", {
+      params: { email },
+    });
+  };
+
+  return { signup, login, kakaoLogin, checkEmail };
 };
 
 export default memberApi;
