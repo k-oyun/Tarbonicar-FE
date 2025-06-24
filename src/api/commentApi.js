@@ -3,9 +3,9 @@ import axios from './AxiosInstance.js';
 export const commentApi = () => {
 
     // 댓글 리스트 조회
-    const getCommentList = async (articleId) => {
+    const getCommentList = async (articleId, page = 0, size = 20) => {
         return await axios.get('/api/v1/comment', {
-            params: { articleId }
+            params: { articleId, page, size }
         });
     };
 
