@@ -4,7 +4,8 @@ import ArticleFilter from "../components/ArticleFilter.jsx";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
 import ArticleListItem from "../components/ArticleListItem.jsx";
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {Pagination} from "@mui/material";
 
 // 전체 컨텐츠 영역
 const Content = styled.div`
@@ -52,6 +53,10 @@ const TopBar = styled.div`
     display: flex;
     justify-content: flex-end;
     margin-bottom: 16px;
+
+    @media (max-width: 767px) {
+        justify-content: center;
+    }
 `;
 
 // 작성 버튼
@@ -67,6 +72,11 @@ const WriteButton = styled.button`
 
     &:hover {
         background-color: #001e3e;
+    }
+    
+    @media (max-width: 767px) {
+        width: 100%;
+        margin-right: 0;
     }
 `;
 
@@ -88,6 +98,14 @@ const ArticleList = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [articleList, setArticleList] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [page, setPage] = useState(0); // 1부터 시작
+    const pageSize = 12; // 한 페이지당 게시글 개수, 마음대로 조정
+
+    const [isLastPage, setIsLastPage] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const observer = useRef();
+
     const { getArticleListApi } = articleApi();
 
     const norm = val => !val || val === "all" ? "" : val;
@@ -105,19 +123,82 @@ const ArticleList = () => {
         sortType: "RECENT"
     });
 
-    // 리스트 조회
+    // PC: 페이지가 바뀔 때마다 새로 덮어쓰기, 모바일: 누적
     useEffect(() => {
-        const fetchList = async () => {
-            try {
-                const res = await getArticleListApi(filters);
-                setArticleList(res.data.data); // 백엔드 응답에 따라 .data 경로 수정
-            } catch (e) {
-                console.log(e);
-                setArticleList([]);
+        setArticleList([]);
+        setPage(0);
+        setIsLastPage(false);
+        setTotalPages(1);
+
+        if (isMobile) {
+            // 모바일: 필터 바뀌면 첫 페이지부터 누적 초기화
+            loadMoreArticles(0, true);
+        } else {
+            // PC: 해당 페이지 데이터로 새로 덮어쓰기
+            fetchList(page);
+        }
+        // eslint-disable-next-line
+    }, [filters, isMobile]);
+
+    useEffect(() => {
+        if (!isMobile) {
+            fetchList(page);
+        }
+        // eslint-disable-next-line
+    }, [page]);
+
+    // 리스트 조회
+    // PC 페이지 요청
+    const fetchList = async (targetPage = 0) => {
+        try {
+            setIsLoading(true);
+            const res = await getArticleListApi({ ...filters, page: targetPage, size: pageSize });
+            const { content, totalPages, last } = res.data.data;
+            setArticleList(content);
+            setTotalPages(totalPages);
+            setIsLastPage(last);
+        } catch (e) {
+            setArticleList([]);
+            setTotalPages(1);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 모바일: 무한 스크롤로 누적
+    const loadMoreArticles = async (targetPage, isReset = false) => {
+        if (isLoading || isLastPage) return;
+        setIsLoading(true);
+        try {
+            const res = await getArticleListApi({ ...filters, page: targetPage, size: pageSize });
+            const { content, last, totalPages } = res.data.data;
+            setArticleList(prev => isReset ? content : [...prev, ...content]);
+            setPage(targetPage);
+            setIsLastPage(last);
+            setTotalPages(totalPages);
+        } catch (e) {
+            // ignore
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 무한 스크롤: 마지막 카드에 ref 달기
+    const lastItemRef = useCallback(node => {
+        if (!isMobile) return;
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new window.IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !isLastPage && !isLoading) {
+                loadMoreArticles(page + 1);
             }
-        };
-        fetchList();
-    }, [filters]); // filters가 바뀔 때마다 재요청
+        });
+        if (node) observer.current.observe(node);
+    }, [isMobile, isLastPage, isLoading, page]);
+
+    const handlePageChange = (event, value) => {
+        setPage(value - 1);
+    };
 
     const writeClick = () => {
         navigate("../article-write");
@@ -139,13 +220,40 @@ const ArticleList = () => {
                         </TopBar>
                         <CardGrid>
                             {articleList && articleList.length > 0 ? (
-                                articleList.map((article, i) =>
-                                    <ArticleListItem key={article.id || i} article={article} />
-                                )
+                                articleList.map((article, idx) => {
+                                    const isLast = isMobile && idx === articleList.length - 1;
+                                    return (
+                                        <ArticleListItem
+                                            key={article.id || idx}
+                                            article={article}
+                                            ref={isLast ? lastItemRef : undefined}
+                                        />
+                                    );
+                                })
                             ) : (
                                 <div>게시글이 없습니다.</div>
                             )}
                         </CardGrid>
+                        {/* 페이지네이션 */}
+                        {!isMobile && totalPages > 1 && (
+                            <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
+                                <Pagination
+                                    count={totalPages}
+                                    page={page + 1}
+                                    onChange={handlePageChange}
+                                    shape="rounded"
+                                    color="primary"
+                                    siblingCount={1}
+                                    boundaryCount={1}
+                                    showFirstButton
+                                    showLastButton
+                                />
+                            </div>
+                        )}
+                        {/* 모바일에서 로딩중 메시지 */}
+                        {isMobile && isLoading && (
+                            <div style={{ textAlign: "center", color: "#aaa", padding: 12 }}>게시글 불러오는 중...</div>
+                        )}
                     </ContentArea>
                 </Layout>
             </Content>
