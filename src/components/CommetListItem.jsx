@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {forwardRef, useState} from "react";
 import styled from "styled-components";
 import defaultAvatar from "../assets/imgs/Sahuru.png";
 import {timeForToday} from "../utils/timeForToday.js";
@@ -93,17 +93,15 @@ const EditBtn = styled.button`
     & + & { background: #eee; color: #444; }
 `;
 
-const CommentListItem = ({comment, isMine, editing, onDelete, onReport,
-                             onEdit,             // 수정 버튼 클릭 핸들러
-                             onEditComplete,     // 수정 완료
-                             onEditCancel        // 수정 취소
-                         }) => {
+const CommentListItem = forwardRef((
+    { comment, isMine, editing, onDelete, onReport, onEdit, onEditComplete, onEditCancel }, ref
+) => {
     const [editValue, setEditValue] = useState(comment.content);
 
     // 댓글 수정 모드
     if (editing) {
         return (
-            <Wrapper>
+            <Wrapper ref={ref}>
                 <Body>
                     <TopRow>
                         <Avatar src={comment.profileImage || defaultAvatar} alt="프로필" />
@@ -129,7 +127,7 @@ const CommentListItem = ({comment, isMine, editing, onDelete, onReport,
 
     // 평소 댓글 보기 모드
     return (
-        <Wrapper>
+        <Wrapper ref={ref}>
             <Body>
                 <TopRow>
                     <Avatar src={comment.profileImage || defaultAvatar} alt="프로필" />
@@ -152,6 +150,6 @@ const CommentListItem = ({comment, isMine, editing, onDelete, onReport,
             </Body>
         </Wrapper>
     );
-};
+});
 
 export default CommentListItem;
