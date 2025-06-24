@@ -17,11 +17,15 @@ const HeaderContainer = styled.header`
   width: 100%;
   height: ${(props) => (props.$ismobile ? "60px" : "80px")};
   border-bottom: ${(props) =>
-    props.$isReviewVisible ? "1px solid #d9d9d9" : "none"};
+    props.$isReviewVisible
+      ? "1px solid #d9d9d9"
+      : props.$border
+      ? "1px solid #d9d9d9"
+      : "none"};
   background-color: ${(props) =>
     props.$isReviewVisible
       ? "rgba(255, 255, 255, 0.95)"
-      : "rgba(0, 0, 0, 0.3)"};
+      : props.$backgroundColor};
   color: ${(props) => (props.$isReviewVisible ? "#002c5f" : "white")};
   backdrop-filter: blur(8px);
   transition: background-color 0.3s ease, border-bottom 0.3s ease;
@@ -52,7 +56,7 @@ const UserImageContainer = styled.div`
 
 const HeaderText = styled.span`
   font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
-  color: ${(props) => (props.$isReviewVisible ? "black" : "white")};
+  color: ${(props) => (props.$isReviewVisible ? "black" : props.$textColor)};
 `;
 
 const LoginBtn = styled.button`
@@ -63,7 +67,7 @@ const LoginBtn = styled.button`
   margin-right: 15px;
   font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   border: none;
-  color: ${(props) => (props.$isReviewVisible ? "black" : "white")};
+  color: ${(props) => (props.$isReviewVisible ? "black" : props.$textColor)};
   cursor: pointer;
   &:hover {
     transform: scale(1.1);
@@ -115,7 +119,13 @@ const PopupImg = styled.img`
   margin-right: ${(props) => props.$mr};
 `;
 
-const Header = ({ isReviewVisible }) => {
+const Header = ({
+  isReviewVisible,
+  backgroundColor,
+  textColor,
+  logoColor,
+  border,
+}) => {
   const naviagate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [userImg, setUserImg] = useState("");
@@ -166,7 +176,12 @@ const Header = ({ isReviewVisible }) => {
   }, []);
   return (
     <>
-      <HeaderContainer $ismobile={isMobile} $isReviewVisible={isReviewVisible}>
+      <HeaderContainer
+        $ismobile={isMobile}
+        $isReviewVisible={isReviewVisible}
+        $backgroundColor={backgroundColor}
+        $border={border}
+      >
         {isReviewVisible ? (
           <Logo
             src={logoImgDark}
@@ -176,7 +191,7 @@ const Header = ({ isReviewVisible }) => {
           />
         ) : (
           <Logo
-            src={logoImgWhite}
+            src={logoColor === "white" ? logoImgWhite : logoImgDark}
             alt="로고이미지"
             $ismobile={isMobile}
             onClick={onClickLogo}
@@ -188,6 +203,7 @@ const Header = ({ isReviewVisible }) => {
             <LoginBtn
               $ismobile={isMobile}
               $isReviewVisible={isReviewVisible}
+              $textColor={textColor}
               onClick={onClickLoginText}
             >
               로그인하러 가기
@@ -197,6 +213,7 @@ const Header = ({ isReviewVisible }) => {
               <HeaderText
                 $ismobile={isMobile}
                 $isReviewVisible={isReviewVisible}
+                $textColor={textColor}
               >
                 {nickname}님, 환영합니다.
               </HeaderText>
