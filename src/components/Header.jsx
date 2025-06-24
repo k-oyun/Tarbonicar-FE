@@ -6,7 +6,6 @@ import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 import { fadeDown } from "../styles/animation";
 import { useMediaQuery } from "react-responsive";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { memberApi } from "../api/memberApi";
@@ -125,7 +124,6 @@ const Header = ({
   textColor,
   logoColor,
   border,
-  onModal,
 }) => {
   const naviagate = useNavigate();
   const [nickname, setNickname] = useState("");
