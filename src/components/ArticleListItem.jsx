@@ -6,6 +6,7 @@ import like from "../assets/Svgs/like.svg";
 import unlike from "../assets/Svgs/unlike.svg";
 import comment from "../assets/Svgs/comment.svg";
 import DOMPurify from "dompurify";
+import {forwardRef} from "react";
 
 const Card = styled.div`
     background-color: white;
@@ -58,6 +59,13 @@ const Title = styled.h3`
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    min-height: 1.4em;
 `;
 
 const Text = styled.p`
@@ -87,7 +95,7 @@ const IconGroup = styled.div`
     gap: 8px;
 `;
 
-const ArticleListItem = ({article}) => {
+const ArticleListItem = forwardRef(({article}, ref) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
@@ -113,7 +121,7 @@ const ArticleListItem = ({article}) => {
     }
 
     return (
-        <Card onClick={handleClick}>
+        <Card ref={ref} onClick={handleClick}>
             <Image src={firstImg || defaultImage} alt="차량 이미지" $isDefault={!firstImg}/>
             <Content>
                 <TagRow>
@@ -133,6 +141,6 @@ const ArticleListItem = ({article}) => {
             </Content>
         </Card>
     );
-};
+});
 
 export default ArticleListItem;
