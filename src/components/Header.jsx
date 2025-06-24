@@ -191,7 +191,6 @@ const Header = ({
   return (
     <>
       <HeaderContainer
-        key={isModalOpen}
         $ismobile={isMobile}
         $isReviewVisible={isReviewVisible}
         $backgroundColor={backgroundColor}
