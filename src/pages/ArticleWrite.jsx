@@ -1,4 +1,4 @@
-
+// src/pages/ArticleWrite.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -23,9 +23,9 @@ import styled, { createGlobalStyle } from "styled-components";
 import { useMediaQuery } from "react-responsive";
 import SelectBox      from "../components/SelectBox";
 import ConfirmDialog  from "../components/ConfirmDialog";
-import {articleApi} from "../api/articleApi.js";
-import {categoryApi} from "../api/categoryApi.js";
-import {imageUploadApi} from "../api/imageUploadApi.js";
+import { articleApi } from "../api/articleApi.js";
+import { categoryApi } from "../api/categoryApi.js";
+import { imageUploadApi } from "../api/imageUploadApi.js";
 
 const HEADER_DESKTOP = 80;
 const HEADER_MOBILE  = 60;
@@ -80,12 +80,19 @@ const EditorWrapper = styled.div`
 `;
 
 export default function ArticleWrite() {
-    const { postArticleApi } = articleApi();
+    // 여기에 getArticleApi, postArticleApi, updateArticleApi 모두 받아옵니다!
+    const { getArticleApi, postArticleApi, updateArticleApi } = articleApi();
     const { postImageUploadApi } = imageUploadApi();
     const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
 
     const editorRef = useRef(null);
     const [ready, setReady] = useState(false);
+
+    // URL query 의 id 파라미터
+    const articleId = useMemo(
+        () => new URLSearchParams(window.location.search).get("id"),
+        []
+    );
 
     // 입력 상태
     const [title, setTitle]       = useState('');
@@ -93,11 +100,11 @@ export default function ArticleWrite() {
     const [category, setCategory] = useState('');
 
     // 차종, 차량, 연식
-    const [carTypes, setCarTypes]           = useState([]);
+    const [carTypes, setCarTypes]               = useState([]);
     const [selectedCarType, setSelectedCarType] = useState('');
-    const [carNames, setCarNames]           = useState([]);
+    const [carNames, setCarNames]               = useState([]);
     const [selectedCarName, setSelectedCarName] = useState('');
-    const [carAges, setCarAges]             = useState([]);
+    const [carAges, setCarAges]                 = useState([]);
     const [selectedCarAge, setSelectedCarAge]   = useState('');
 
     const [dialog, setDialog] = useState({ isOpen:false });
@@ -169,8 +176,26 @@ export default function ArticleWrite() {
         };
     },[ready,toolbarOffset]);
 
-    // 데이터 로딩
-    useEffect(()=>{ carTypeListApi().then(r => setCarTypes(r.data.data || [] )) },[]);
+    // 편집 모드: 기존 데이터 로딩
+    useEffect(() => {
+        if (!articleId) return;
+        getArticleApi(articleId)
+            .then(res => {
+                if (res.data.success) {
+                    const d = res.data.data;
+                    setTitle(d.title);
+                    setContent(d.content);
+                    setCategory(d.articleType);
+                    setSelectedCarType(d.carType);
+                    setSelectedCarName(d.carName);
+                    setSelectedCarAge(d.carAge);
+                }
+            })
+            .catch(console.error);
+    }, [articleId]);
+
+    // 데이터 로딩 (카테고리)
+    useEffect(()=>{ carTypeListApi().then(r => setCarTypes(r.data.data || [])) },[]);
     useEffect(()=>{
         if(!selectedCarType){
             setCarNames([]); setSelectedCarName(''); setCarAges([]); setSelectedCarAge(''); return;
@@ -195,7 +220,7 @@ export default function ArticleWrite() {
         });
     };
 
-    // 작성하기
+    // 작성/수정 처리
     const handleSubmit = () => {
         if(!title.trim())              { openDialog({title:"제목을 입력하세요"});          return; }
         if(!category)                  { openDialog({title:"카테고리를 선택하세요"});      return; }
@@ -206,25 +231,41 @@ export default function ArticleWrite() {
             openDialog({title:"내용을 입력하세요"});                                        return;
         }
 
-        postArticleApi({
+        const payload = {
             title,
             content,
             articleType: category,
-            categoryId : Number(selectedCarAge),
-            memberId   : 1
-        })
-            .then(res=>{
-                const newId = res.data?.data?.id ?? res.data?.data;
-                openDialog({
-                    title:"게시글이 등록되었습니다.",
-                    onConfirm:()=>window.location.href=`/article-view?id=${newId}`
-                });
-            })
-            .catch(()=>openDialog({
-                title:"등록 실패",
-                message:"잠시 후 다시 시도해 주세요.",
-                isRedButton:true
-            }));
+            categoryId: Number(selectedCarAge),
+        };
+        if (articleId) {
+            payload.articleId = Number(articleId);
+            updateArticleApi(payload)
+                .then(() => {
+                    openDialog({
+                        title:"게시글이 수정되었습니다.",
+                        onConfirm: ()=>window.location.href=`/article-view?id=${articleId}`
+                    });
+                })
+                .catch(()=>openDialog({
+                    title:"수정 실패",
+                    message:"잠시 후 다시 시도해 주세요.",
+                    isRedButton:true
+                }));
+        } else {
+            postArticleApi(payload)
+                .then(res=>{
+                    const newId = res.data?.data?.id ?? res.data?.data;
+                    openDialog({
+                        title:"게시글이 등록되었습니다.",
+                        onConfirm:()=>window.location.href=`/article-view?id=${newId}`
+                    });
+                })
+                .catch(()=>openDialog({
+                    title:"등록 실패",
+                    message:"잠시 후 다시 시도해 주세요.",
+                    isRedButton:true
+                }));
+        }
     };
 
     // 드롭다운 열림/닫힘
@@ -247,7 +288,11 @@ export default function ArticleWrite() {
             <GlobalStyle/>
 
             <PageWrap $top={wrapperTop}>
-                <ActionBar><SubmitBtn onClick={handleSubmit}>작성하기</SubmitBtn></ActionBar>
+                <ActionBar>
+                    <SubmitBtn onClick={handleSubmit}>
+                        {articleId ? '수정하기' : '작성하기'}
+                    </SubmitBtn>
+                </ActionBar>
 
                 <TitleInput placeholder="제목을 입력하세요." value={title} onChange={e=>setTitle(e.target.value)} />
 
@@ -286,6 +331,7 @@ export default function ArticleWrite() {
                                 editor={ClassicEditor}
                                 config={editorConfig}
                                 onChange={(e,ed)=>setContent(ed.getData())}
+                                data={content}
                             />
                         )}
                     </EditorWrapper>

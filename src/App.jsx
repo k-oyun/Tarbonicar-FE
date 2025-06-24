@@ -11,6 +11,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import MyArticle from "./pages/MyArticle.jsx";
+import KakaoRedirect from "./pages/KakaoRedirect";
 
 function HeaderSelector() {
   const location = useLocation();
@@ -35,6 +36,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/my-page" element={<MyPage />} />
         <Route path="/my-article" element={<MyArticle />} />
+        <Route path="/oauth/kakao" element={<KakaoRedirect />} />
       </Routes>
     </BrowserRouter>
   );

@@ -7,6 +7,7 @@ import logoImgDark from "../assets/imgs/logoDark.png";
 import emailIcon from "../assets/imgs/emailIcon.svg";
 import passwordIcon from "../assets/imgs/passwordIcon.svg";
 import kakaoIcon from "../assets/imgs/kakaoIcon.svg";
+import memberApi from "../api/memberApi";
 
 const Container = styled.div`
   display: flex;
@@ -137,7 +138,38 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    alert("API 연동 전 테스트");
+    try {
+      const res = await memberApi().login({ email, password });
+      const accessToken = res.data.data.accessToken;
+      const refreshToken = res.data.data.refreshToken;
+
+      if (accessToken && refreshToken) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        alert("로그인 성공!");
+        navigate("/"); // 메인페이지로 이동
+      } else {
+        alert("로그인 실패: 토큰 없음");
+      }
+    } catch (err) {
+      alert("로그인 실패: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleKakaoLogin = async () => {
+    try {
+      // 1. 카카오 인가코드 받기
+      const clientId = import.meta.env.VITE_KAKAO_REST_API_KEY;
+      const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+
+      // 2. 새 창으로 카카오 로그인 띄우기
+      window.location.href = kakaoAuthUrl;
+    } catch (err) {
+      console.error(err);
+      alert("카카오 로그인 실패");
+    }
   };
 
   return (
@@ -174,7 +206,7 @@ const Login = () => {
           </LoginButton>
         </form>
 
-        <KakaoButton>
+        <KakaoButton onClick={handleKakaoLogin}>
           <Kakao src={kakaoIcon} alt="카카오 아이콘" />
           카카오 로그인
         </KakaoButton>

@@ -287,6 +287,7 @@ const MyPage = () => {
     const getUserInfo = async () => {
       try {
         const res = await axios.get("/api/v1/member/user-info");
+        console.log("📥 유저 정보 응답:", res.data); // 이 부분 추가
         setCurNickname(res.data.data.nickname);
         setUserImg(res.data.data.profileImage);
       } catch (error) {
@@ -300,6 +301,13 @@ const MyPage = () => {
   useEffect(() => {
     console.log(isMobile);
   }, [isMobile]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "accessToken",
+      "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmNAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDcyNzU3NX0.FSGEpLOSCHYeLdB8Sl1AKxls0yQKftb9BXOGzLwVeutDSn3HYw9b9p3-ijBjh6tD1IZHXsbAM5U1BgyY5YhQhw"
+    );
+  }, []);
 
   const handleNicknameChange = async () => {
     try {
@@ -369,6 +377,7 @@ const MyPage = () => {
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
+                      handleImageChange(file);
                       const reader = new FileReader();
                       reader.onloadend = () => {
                         setUserImg(reader.result);
@@ -431,7 +440,7 @@ const MyPage = () => {
                   $withRightMargin
                   id="confirmPassword"
                   type="password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </InputRow>
               <ButtonGroup>
