@@ -40,7 +40,11 @@ export const memberApi = () => {
     });
   };
 
-  return { signup, login, kakaoLogin, checkEmail };
+  const userInfoGet = async () => {
+    return await axios.get("/api/v1/member/user-info");
+  };
+
+  return { signup, login, kakaoLogin, checkEmail, userInfoGet };
 };
 
 export default memberApi;

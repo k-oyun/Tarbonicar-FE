@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import logoImgDark from "../assets/imgs/logoDark.png";
 import logoImgWhite from "../assets/imgs/logoWhite.png";
-import sahuruImg from "../assets/imgs/Sahuru.png";
 import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 import { fadeDown } from "../styles/animation";
@@ -10,6 +9,7 @@ import { useMediaQuery } from "react-responsive";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { memberApi } from "../api/memberApi";
 const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
@@ -133,6 +133,7 @@ const Header = ({
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalConfirm, setIsModalConfirm] = useState(false);
+  const { userInfoGet } = memberApi();
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
@@ -151,27 +152,11 @@ const Header = ({
     naviagate("/mypage");
   };
 
-  const userInfoGet = async (token) => {
-    const url = "http://localhost:8080/api/v1/member/user-info";
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
-
-    try {
-      const response = await axios.get(url, { headers });
-      return response.data;
-    } catch (error) {
-      console.error("사용자 정보 조회 GET:", error);
-    }
-  };
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
     const InfoGet = async () => {
-      const res = await userInfoGet(token);
-      setNickname(res.data.nickname);
-      setUserImg(res.data.profileImage);
+      const res = await userInfoGet();
+      setNickname(res.data.data.nickname);
+      setUserImg(res.data.data.profileImage);
     };
 
     InfoGet();
