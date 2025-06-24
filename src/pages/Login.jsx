@@ -8,6 +8,7 @@ import emailIcon from "../assets/imgs/emailIcon.svg";
 import passwordIcon from "../assets/imgs/passwordIcon.svg";
 import kakaoIcon from "../assets/imgs/kakaoIcon.svg";
 import memberApi from "../api/memberApi";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const Container = styled.div`
   display: flex;
@@ -22,8 +23,9 @@ const LoginBox = styled.div`
   width: 100%;
   max-width: 400px;
   padding: 40px 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: ${(props) => (props.$isMobile ? "0" : "8px")};
+  box-shadow: ${(props) =>
+    props.$isMobile ? "none" : "0 4px 10px rgba(0, 0, 0, 0.1)"};
   text-align: center;
 `;
 
@@ -135,6 +137,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [dialog, setDialog] = useState({ isOpen: false });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -147,13 +150,24 @@ const Login = () => {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
-        alert("로그인 성공!");
-        navigate("/"); // 메인페이지로 이동
+        navigate("/");
       } else {
-        alert("로그인 실패: 토큰 없음");
+        setDialog({
+          isOpen: true,
+          title: "로그인 실패",
+          message: "토큰이 존재하지 않습니다.",
+          isRedButton: true,
+          onConfirm: () => setDialog({ isOpen: false }),
+        });
       }
     } catch (err) {
-      alert("로그인 실패: " + (err.response?.data?.message || err.message));
+      setDialog({
+        isOpen: true,
+        title: "로그인 실패",
+        message: err.response?.data?.message || err.message,
+        isRedButton: true,
+        onConfirm: () => setDialog({ isOpen: false }),
+      });
     }
   };
 
@@ -167,14 +181,19 @@ const Login = () => {
       // 2. 새 창으로 카카오 로그인 띄우기
       window.location.href = kakaoAuthUrl;
     } catch (err) {
-      console.error(err);
-      alert("카카오 로그인 실패");
+      setDialog({
+        isOpen: true,
+        title: "카카오 로그인 실패",
+        message: err.message,
+        isRedButton: true,
+        onConfirm: () => setDialog({ isOpen: false }),
+      });
     }
   };
 
   return (
     <Container $isMobile={isMobile}>
-      <LoginBox>
+      <LoginBox $isMobile={isMobile}>
         <Logo src={logoImgDark} alt="로고 이미지" />
         <form onSubmit={handleLogin}>
           <InputBox>
@@ -211,8 +230,19 @@ const Login = () => {
           카카오 로그인
         </KakaoButton>
 
-        <BottomText>계정이 없으신가요?</BottomText>
+        <BottomText onClick={() => navigate("/signup")}>
+          계정이 없으신가요?
+        </BottomText>
       </LoginBox>
+
+      <ConfirmDialog
+        isOpen={dialog.isOpen}
+        title={dialog.title}
+        message={dialog.message}
+        isRedButton={dialog.isRedButton}
+        onConfirm={dialog.onConfirm}
+        onCancel={dialog.onCancel || (() => setDialog({ isOpen: false }))}
+      />
     </Container>
   );
 };
