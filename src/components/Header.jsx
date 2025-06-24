@@ -9,7 +9,7 @@ import { fadeDown } from "../styles/animation";
 import { useMediaQuery } from "react-responsive";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import ConfirmDialog from "../components/ConfirmDialog";
 const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
@@ -125,11 +125,14 @@ const Header = ({
   textColor,
   logoColor,
   border,
+  onModal,
 }) => {
   const naviagate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [userImg, setUserImg] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalConfirm, setIsModalConfirm] = useState(false);
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
@@ -148,12 +151,11 @@ const Header = ({
     naviagate("/mypage");
   };
 
-  const userInfoGet = async () => {
+  const userInfoGet = async (token) => {
     const url = "http://localhost:8080/api/v1/member/user-info";
 
     const headers = {
-      Authorization:
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGRiczEyMDhAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImV4cCI6MTc1MDY0NzE3MH0.U5LIu9sLVKLanexa3J5GPWEI6rZRHIk8X8QDjQg-q1agGt_wThDhkrlcTFiH3qca5Y_KA6FfIRNQfI-8c9e33Q",
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
@@ -165,18 +167,31 @@ const Header = ({
     }
   };
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
     const InfoGet = async () => {
-      const res = await userInfoGet();
+      const res = await userInfoGet(token);
       setNickname(res.data.nickname);
       setUserImg(res.data.profileImage);
-      console.log(res);
     };
 
     InfoGet();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
+    if (isModalConfirm) {
+      naviagate("/");
+      window.location.reload();
+    }
+  }, [isModalConfirm]);
   return (
     <>
       <HeaderContainer
+        key={isModalOpen}
         $ismobile={isMobile}
         $isReviewVisible={isReviewVisible}
         $backgroundColor={backgroundColor}
@@ -232,12 +247,23 @@ const Header = ({
             <PopupImg src={profileIcon} $width="20px" $mr="5px" />
             마이페이지
           </PopupBtn>
-          <PopupBtn>
+          <PopupBtn onClick={handleLogout}>
             <PopupImg src={LogoutIcon} $width="15px" $mr="10px" />
             로그아웃
           </PopupBtn>
         </Popup>
       ) : null}
+      <ConfirmDialog
+        isOpen={isModalOpen}
+        title="로그아웃 되었습니다."
+        // message="게시글이 성공적으로 등록되었습니다."
+        onConfirm={() => {
+          setIsModalOpen(false);
+          setIsModalConfirm(true);
+        }}
+        showCancel={false}
+        isRedButton={false}
+      />
     </>
   );
 };
