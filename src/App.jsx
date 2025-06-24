@@ -19,7 +19,15 @@ function HeaderSelector() {
 
   if (path === "/signup") return <RegisterHeader />;
   if (path === "/login") return null;
-  return <Header />;
+  if (path === "/") return null;
+  return (
+    <Header
+      backgroundColor={"transparent"}
+      textColor={"black"}
+      logoColor={"dark"}
+      border={true}
+    />
+  );
 }
 
 function App() {

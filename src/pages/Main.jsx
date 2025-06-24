@@ -276,7 +276,13 @@ const Main = () => {
   }, [selectedModel]);
   return (
     <>
-      <Header isReviewVisible={isReviewVisible} />
+      <Header
+        isReviewVisible={isReviewVisible}
+        backgroundColor={"rgba(0, 0, 0, 0.3)"}
+        textColor={"white"}
+        logoColor={"white"}
+        border={false}
+      />
       <MainContainer>
         <VideoContainer>
           <Video

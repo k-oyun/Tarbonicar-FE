@@ -1,4 +1,3 @@
-// src/pages/ArticleWrite.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -32,7 +31,7 @@ const HEADER_MOBILE  = 60;
 const MOBILE_MAX     = '767px';
 const LICENSE_KEY    = 'GPL';
 
-/* 전역 스타일 */
+// 전역 스타일
 const GlobalStyle = createGlobalStyle`
     body { font-family:'Lato',sans-serif; }
     @media (max-width:${MOBILE_MAX}) {
@@ -80,7 +79,7 @@ const EditorWrapper = styled.div`
 `;
 
 export default function ArticleWrite() {
-    // 여기에 getArticleApi, postArticleApi, updateArticleApi 모두 받아옵니다!
+
     const { getArticleApi, postArticleApi, updateArticleApi } = articleApi();
     const { postImageUploadApi } = imageUploadApi();
     const { carTypeListApi, carNameListApi, carAgeListApi } = categoryApi();
@@ -114,6 +113,7 @@ export default function ArticleWrite() {
     const headerHeight  = isMobile ? HEADER_MOBILE : HEADER_DESKTOP;
     const wrapperTop    = headerHeight + 20;
     const toolbarOffset = headerHeight;
+    const selectWidth   = isMobile ? "100px" : "110px";  // 수정: PC/모바일에 따라 width 지정
 
     // 에디터 폰트 적용
     useEffect(()=>{
@@ -143,38 +143,42 @@ export default function ArticleWrite() {
     }
 
     // CKEditor 설정
-    const { editorConfig } = useMemo(()=>{
-        if(!ready) return {};
+    const editorConfig = useMemo(() => {
+        if (!ready) return null;
         return {
-            editorConfig:{
-                toolbar:{ items:[
-                        'undo','redo','|','sourceEditing','showBlocks','findAndReplace','fullscreen','|',
-                        'heading','style','|','fontSize','fontFamily','fontColor','fontBackgroundColor','|',
-                        'bold','italic','underline','strikethrough','subscript','superscript',
-                        'code','removeFormat','|','emoji','specialCharacters','horizontalLine','pageBreak',
-                        'link','bookmark','insertImage','mediaEmbed','insertTable','insertTableLayout',
-                        'highlight','blockQuote','codeBlock','htmlEmbed','|','alignment','|',
-                        'bulletedList','numberedList','todoList','outdent','indent'
-                    ], viewportTopOffset:toolbarOffset, shouldNotGroupWhenFull:false },
-                plugins:[
-                    Alignment,Autoformat,AutoImage,AutoLink,Autosave,BlockQuote,Bold,Bookmark,Code,CodeBlock,
-                    Emoji,Essentials,FindAndReplace,FontBackgroundColor,FontColor,FontFamily,FontSize,FullPage,
-                    Fullscreen,GeneralHtmlSupport,Heading,Highlight,HorizontalLine,HtmlComment,HtmlEmbed,
-                    ImageBlock,ImageCaption,ImageInline,ImageInsert,ImageInsertViaUrl,ImageResize,ImageStyle,
-                    ImageTextAlternative,ImageToolbar,ImageUpload,Indent,IndentBlock,Italic,Link,LinkImage,List,
-                    ListProperties,MediaEmbed,Mention,PageBreak,Paragraph,PasteFromOffice,PlainTableOutput,
-                    RemoveFormat,ShowBlocks,SourceEditing,SpecialCharacters,SpecialCharactersArrows,
-                    SpecialCharactersCurrency,SpecialCharactersEssentials,SpecialCharactersLatin,
-                    SpecialCharactersMathematical,SpecialCharactersText,Strikethrough,Style,Subscript,
-                    Superscript,Table,TableCaption,TableCellProperties,TableColumnResize,TableLayout,
-                    TableProperties,TableToolbar,TextTransformation,TodoList,Underline,DragDrop
+            toolbar: {
+                items: [
+                    'undo','redo','|','sourceEditing','showBlocks','findAndReplace','fullscreen','|',
+                    'heading','style','|','fontSize','fontFamily','fontColor','fontBackgroundColor','|',
+                    'bold','italic','underline','strikethrough','subscript','superscript',
+                    'code','removeFormat','|','emoji','specialCharacters','horizontalLine','pageBreak',
+                    'link','bookmark','insertImage','mediaEmbed','insertTable','insertTableLayout',
+                    'highlight','blockQuote','codeBlock','htmlEmbed','|','alignment','|',
+                    'bulletedList','numberedList','todoList','outdent','indent'
                 ],
-                extraPlugins:[CustomUploadAdapterPlugin],
-                language:'ko', placeholder:'내용을 입력하세요.', translations:[translations],
-                licenseKey:LICENSE_KEY
-            }
+                viewportTopOffset: toolbarOffset,
+                shouldNotGroupWhenFull: false
+            },
+            plugins: [
+                Alignment,Autoformat,AutoImage,AutoLink,Autosave,BlockQuote,Bold,Bookmark,Code,CodeBlock,
+                Emoji,Essentials,FindAndReplace,FontBackgroundColor,FontColor,FontFamily,FontSize,FullPage,
+                Fullscreen,GeneralHtmlSupport,Heading,Highlight,HorizontalLine,HtmlComment,HtmlEmbed,
+                ImageBlock,ImageCaption,ImageInline,ImageInsert,ImageInsertViaUrl,ImageResize,ImageStyle,
+                ImageTextAlternative,ImageToolbar,ImageUpload,Indent,IndentBlock,Italic,Link,LinkImage,List,
+                ListProperties,MediaEmbed,Mention,PageBreak,Paragraph,PasteFromOffice,PlainTableOutput,
+                RemoveFormat,ShowBlocks,SourceEditing,SpecialCharacters,SpecialCharactersArrows,
+                SpecialCharactersCurrency,SpecialCharactersEssentials,SpecialCharactersLatin,
+                SpecialCharactersMathematical,SpecialCharactersText,Strikethrough,Style,Subscript,
+                Superscript,Table,TableCaption,TableCellProperties,TableColumnResize,TableLayout,
+                TableProperties,TableToolbar,TextTransformation,TodoList,Underline,DragDrop
+            ],
+            extraPlugins: [ CustomUploadAdapterPlugin ],
+            language: 'ko',
+            placeholder: '내용을 입력하세요.',
+            translations: [ translations ],
+            licenseKey: LICENSE_KEY
         };
-    },[ready,toolbarOffset]);
+    }, [ready, toolbarOffset]);
 
     // 편집 모드: 기존 데이터 로딩
     useEffect(() => {
@@ -188,7 +192,16 @@ export default function ArticleWrite() {
                     setCategory(d.articleType);
                     setSelectedCarType(d.carType);
                     setSelectedCarName(d.carName);
-                    setSelectedCarAge(d.carAge);
+
+                    // 수정: 연식 목록 받아오고, 서버의 carAge(년도)와 매칭되는 id로 설정
+                    carAgeListApi(d.carName)
+                        .then(r => {
+                            const ages = r.data.data || [];
+                            setCarAges(ages);
+                            const matched = ages.find(a => a.carAge === d.carAge);
+                            if (matched) setSelectedCarAge(matched.id);
+                        })
+                        .catch(console.error);
                 }
             })
             .catch(console.error);
@@ -243,7 +256,7 @@ export default function ArticleWrite() {
                 .then(() => {
                     openDialog({
                         title:"게시글이 수정되었습니다.",
-                        onConfirm: ()=>window.location.href=`/article-view?id=${articleId}`
+                        onConfirm: ()=>window.location.replace(`/article-view?id=${articleId}`)
                     });
                 })
                 .catch(()=>openDialog({
@@ -257,7 +270,7 @@ export default function ArticleWrite() {
                     const newId = res.data?.data?.id ?? res.data?.data;
                     openDialog({
                         title:"게시글이 등록되었습니다.",
-                        onConfirm:()=>window.location.href=`/article-view?id=${newId}`
+                        onConfirm:()=>window.location.replace(`/article-view?id=${newId}`)
                     });
                 })
                 .catch(()=>openDialog({
@@ -300,28 +313,44 @@ export default function ArticleWrite() {
                     <SelectsContainer $isOpen={isOpen} ref={selectRef}>
                         <SelectBox
                             options={[{value:'REVIEW',label:'리뷰'},{value:'TESTDRIVE',label:'시승'},{value:'TIP',label:'TIP'}]}
-                            placeholder="카테고리" value={category} onSelect={setCategory}
-                            isSelected={category} onClick={handleSelectBox}
+                            placeholder="카테고리"
+                            value={category}
+                            onSelect={setCategory}
+                            isSelected={category}
+                            onClick={handleSelectBox}
+                            width={selectWidth}
                         />
 
                         <SelectBox
                             options={carTypes.map(c=>({value:c.carType,label:c.carType}))}
-                            placeholder="차종" value={selectedCarType} onSelect={setSelectedCarType}
-                            isSelected={selectedCarType} onClick={handleSelectBox}
+                            placeholder="차종"
+                            value={selectedCarType}
+                            onSelect={setSelectedCarType}
+                            isSelected={selectedCarType}
+                            onClick={handleSelectBox}
+                            width={selectWidth}
                         />
 
                         <SelectBox
                             options={vehicleDisabled?[]:carNames.map(c=>({value:c.carName,label:c.carName}))}
-                            placeholder="차량" value={selectedCarName} onSelect={setSelectedCarName}
-                            isSelected={selectedCarName} disabled={vehicleDisabled}
+                            placeholder="차량"
+                            value={selectedCarName}
+                            onSelect={setSelectedCarName}
+                            isSelected={selectedCarName}
+                            disabled={vehicleDisabled}
                             onClick={vehicleDisabled?undefined:handleSelectBox}
+                            width={selectWidth}
                         />
 
                         <SelectBox
                             options={ageDisabled?[]:carAges.map(a=>({value:a.id,label:`${a.carAge}년식`}))}
-                            placeholder="연식" value={selectedCarAge} onSelect={setSelectedCarAge}
-                            isSelected={selectedCarAge} disabled={ageDisabled}
+                            placeholder="연식"
+                            value={selectedCarAge}
+                            onSelect={setSelectedCarAge}
+                            isSelected={selectedCarAge}
+                            disabled={ageDisabled}
                             onClick={ageDisabled?undefined:handleSelectBox}
+                            width={selectWidth}
                         />
                     </SelectsContainer>
 
