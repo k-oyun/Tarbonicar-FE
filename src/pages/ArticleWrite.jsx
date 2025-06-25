@@ -56,6 +56,7 @@ const TitleInput = styled.input`
 
 const Controls = styled.div`
     position:relative; z-index:2000; display:flex; flex-direction:column; gap:16px; margin-bottom:16px;
+    overflow-x: hidden;
     @media (max-width:${MOBILE_MAX}){gap:8px; margin-bottom:12px;}
 `;
 
