@@ -61,7 +61,7 @@ const ErrorText = styled.div`
   color: #e20000;
   font-size: 10px;
   margin: 2px 0 8px 4px;
-  text-align: left;
+  text-align: right;
 `;
 
 // 이메일, 비밀번호 입력박스
