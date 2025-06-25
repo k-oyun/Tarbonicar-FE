@@ -52,10 +52,23 @@ export const articleApi = () => {
   };
 
   // 내가 작성한 게시글
-  const getMyArticleListApi = async (sortType = "RECENT") => {
+  const getMyArticleListApi = async (
+    sortType = "RECENT",
+    page = 0,
+    size = 20
+  ) => {
     return await axios.get("/api/v1/article/my-list", {
-      params: { sortType },
+      params: { sortType, page, size },
     });
+  };
+
+  const getMyArticleCountApi = async () => {
+    return await axios.get("/api/v1/article/my-count");
+  };
+
+  const getMyTotalLikeCountApi = async () => {
+    0;
+    return await axios.get("/api/v1/article/my-like-count");
   };
 
   return {
@@ -66,5 +79,7 @@ export const articleApi = () => {
     deleteArticleApi,
     updateArticleApi,
     getMyArticleListApi,
+    getMyArticleCountApi,
+    getMyTotalLikeCountApi,
   };
 };

@@ -4,25 +4,31 @@ import ArrowDownIcon from "../assets/imgs/arrow_down.png"; // 화살표 아이�
 import { useMediaQuery } from "react-responsive";
 
 const Container = styled.div`
-  position: relative;
-  display: inline-block;
+  position: absolute;
+  display: flex;
+  width: 300px;
+  height: ${(props) => (props.$open ? "190px" : "auto")};
+  z-index: 100;
+  /* top: 270px; */
   width: ${(props) => (props.$ismobile ? "100%" : "auto")};
 `;
 
 const Button = styled.button`
-  background-color: transparent;
+  height: 20px;
   border: none;
   font-size: 15px;
   color: #333;
+  background-color: transparent;
   cursor: pointer;
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 4px;
   width: ${(props) => (props.$ismobile ? "100%" : "140px")};
 `;
 
 const Dropdown = styled.ul`
-  top: 100%;
+  top: 15px;
   right: 0;
   margin-top: 6px;
   padding: 6px 0;
@@ -31,9 +37,11 @@ const Dropdown = styled.ul`
   border-radius: 6px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   list-style: none;
-  z-index: 1000;
-  min-width: 140px;
-  width: ${(props) => (props.$ismobile ? "100%" : "140px")};
+  z-index: 10;
+  position: absolute;
+  display: ${(props) => (props.$open ? "block" : " none")};
+  /* min-width: 140px; */
+  width: ${(props) => (props.$ismobile ? "100%" : "130px")};
 `;
 
 const DropdownItem = styled.li`
@@ -42,7 +50,6 @@ const DropdownItem = styled.li`
   color: ${(props) => (props.selected ? "#0d6efd" : "#333")};
   background-color: ${(props) => (props.selected ? "#f0f8ff" : "#fff")};
   cursor: pointer;
-
   &:hover {
     background-color: #f4f4f4;
   }
@@ -55,10 +62,14 @@ const Arrow = styled.img`
   transform: ${(props) => (props.open ? "rotate(180deg)" : "rotate(0deg)")};
 `;
 
-const SortDropdown = ({ options, value, onChange }) => {
+const SortDropdown = ({ options, value, onChange, isOpen }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef();
   const isMobile = useMediaQuery({ query: "(max-width:767px)" });
+
+  useEffect(() => {
+    console.log("자식", open);
+  }, [open]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -70,30 +81,38 @@ const SortDropdown = ({ options, value, onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleBtn = () => {
+    isOpen((prev) => !prev);
+  };
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
-    <Container ref={ref} $ismobile={isMobile}>
-      <Button onClick={() => setOpen((prev) => !prev)}>
+    <Container ref={ref} $ismobile={isMobile} $open={open}>
+      <Button
+        onClick={() => {
+          setOpen((prev) => !prev);
+
+          handleBtn();
+          console.log("open", open);
+        }}
+      >
         {selectedLabel || "정렬"}
         <Arrow src={ArrowDownIcon} open={open} />
       </Button>
-      {open && (
-        <Dropdown>
-          {options.map((opt) => (
-            <DropdownItem
-              key={opt.value}
-              selected={opt.value === value}
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-            >
-              {opt.label}
-            </DropdownItem>
-          ))}
-        </Dropdown>
-      )}
+      <Dropdown $open={open}>
+        {options.map((opt) => (
+          <DropdownItem
+            key={opt.value}
+            selected={opt.value === value}
+            onClick={() => {
+              onChange(opt.value);
+              setOpen(false);
+            }}
+          >
+            {opt.label}
+          </DropdownItem>
+        ))}
+      </Dropdown>
     </Container>
   );
 };

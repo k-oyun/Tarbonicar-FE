@@ -13,6 +13,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import axios from "../api/AxiosInstance";
 import { useUser } from "../context/UserContext";
 import profileIcon from "../assets/imgs/profileIcon.png";
+import { articleApi } from "../api/ArticleApi";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -278,9 +279,17 @@ const MyPage = () => {
   const [selectedMenu, setSelectedMenu] = useState("프로필");
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoReload, setInfoReload] = useState(false);
 
   const { user, setUser } = useUser();
   const navigate = useNavigate();
+  const { getMyArticleCountApi } = articleApi();
+  const [myArticleCount, setMyArticleCount] = useState(0);
+
+  const { getMyTotalLikeCountApi } = articleApi();
+  const [myLikeCount, setMyLikeCount] = useState(0);
 
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
@@ -290,34 +299,66 @@ const MyPage = () => {
     console.log(isMobile);
   }, [isMobile]);
 
+  useEffect(() => {
+    const fetchMyArticleCount = async () => {
+      try {
+        const res = await getMyArticleCountApi();
+        setMyArticleCount(res.data.data); // 결과는 result 안에 있음
+      } catch (err) {
+        console.error("내 글 개수 불러오기 실패", err);
+      }
+    };
+    fetchMyArticleCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchMyTotalLikes = async () => {
+      try {
+        const res = await getMyTotalLikeCountApi();
+        setMyLikeCount(res.data.data);
+      } catch (err) {
+        console.error("내 좋아요 수 불러오기 실패", err);
+      }
+    };
+    fetchMyTotalLikes();
+  }, []);
+
   const handleNicknameChange = async () => {
     try {
       await updateNickname(nickname); // 서버에 닉네임 업데이트
       setUser((prev) => ({ ...prev, nickname })); // Context 업데이트 → Header 자동 반영
-      alert("닉네임이 변경되었습니다.");
-      navigate(0);
+      setInfoModalMessage("닉네임이 변경되었습니다.");
+      setInfoReload(true);
     } catch (e) {
-      alert("닉네임 변경 실패");
+      setInfoModalMessage("닉네임 변경을 실패했습니다.");
+      setInfoReload(false);
     }
+    setInfoModalOpen(true);
   };
   const handlePasswordChange = async () => {
     if (password !== confirmPassword) {
-      alert("비밀번호 그거 아닌데? 아닌데? 아닌데? 아닌데? 응 아니야~");
-      navigate(0);
+      setInfoModalMessage("비밀번호가 틀렸습니다.");
+      setInfoReload(false);
+
+      setInfoModalOpen(true);
       return;
     }
     try {
       await updatePassword(password, confirmPassword);
-      alert("비밀번호가 변경되었습니다.");
-      navigate(0);
+      setInfoModalMessage("비밀번호가 변경되었습니다.");
+      setInfoReload(true);
     } catch (e) {
-      alert("비밀번호 변경 중 오류 발생");
+      setInfoModalMessage("비밀번호 변경 중 오류가 발생했습니다.");
+      setInfoReload(false);
     }
+    setInfoModalOpen(true);
   };
 
   const handleImageChange = async () => {
     if (!selectedFile) {
-      alert("이미지를 먼저 선택해주세요.");
+      setInfoModalMessage("이미지를 먼저 선택해주세요.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
       return;
     }
 
@@ -325,23 +366,27 @@ const MyPage = () => {
       const imageUrl = await updateProfileImage(selectedFile); // 서버 업로드
       setUserImg(imageUrl); // 미리보기 이미지 업데이트
       setUser((prev) => ({ ...prev, profileImage: imageUrl })); // Context도 반영
-      alert("프로필 이미지가 변경되었습니다.");
+      setInfoModalMessage("프로필 이미지가 변경되었습니다.");
+      setInfoReload(true);
       setSelectedFile(null); // 상태 초기화
-      navigate(0);
     } catch (err) {
-      alert("이미지 변경 중 오류가 발생했습니다.");
+      setInfoModalMessage("이미지 변경 중 오류가 발생했습니다.");
+      setInfoReload(false);
     }
+    setInfoModalOpen(true);
   };
 
   const handleDelete = async () => {
     try {
       await deleteMember();
-      alert("회원 탈퇴가 완료되었습니다.");
+      setInfoModalMessage("회원 탈퇴가 완료되었습니다.");
+      setInfoReload(false);
       localStorage.removeItem("accessToken"); // 토큰 삭제
       navigate("/"); // 홈 또는 로그인 페이지로 이동
     } catch (e) {
       console.error("회원 탈퇴 실패:", e);
-      alert("회원 탈퇴 중 오류가 발생했습니다.");
+      setInfoModalMessage("회원 탈퇴 중 오류가 발생했습니다.");
+      setInfoReload(false);
     } finally {
       setIsModalOpen(false);
     }
@@ -513,11 +558,11 @@ const MyPage = () => {
                 $ismobile={isMobile}
               >
                 <span>내가 작성한 글 &gt;</span>
-                <MyArticles $ismobile={isMobile}>23개</MyArticles>
+                <MyArticles $ismobile={isMobile}>{myArticleCount}개</MyArticles>
               </StatsItem>
               <StatsItem $ismobile={isMobile}>
                 <span>받은 좋아요 수 &gt;</span>
-                <MyLikes $ismobile={isMobile}>99개</MyLikes>
+                <MyLikes $ismobile={isMobile}>{myLikeCount}개</MyLikes>
               </StatsItem>
               <StatsItem $ismobile={isMobile}>
                 <span>1:1 문의 내역 &gt;</span>
@@ -527,6 +572,20 @@ const MyPage = () => {
             <ContentWrapper>{renderMainContent()}</ContentWrapper>
           </MainSection>
         </Content>
+        <ConfirmDialog
+          isOpen={infoModalOpen}
+          title="알림"
+          message={infoModalMessage}
+          cancelText=""
+          confirmText="확인"
+          showCancel={false}
+          onConfirm={() => {
+            setInfoModalOpen(false);
+            if (infoReload) {
+              navigate(0);
+            }
+          }}
+        />
       </Container>
     </>
   );
