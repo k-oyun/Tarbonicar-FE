@@ -105,7 +105,7 @@ const ArticleListItem = forwardRef(({article}, ref) => {
     // 본문에서 첫 번째 이미지 src 추출
     const getFirstImageSrc = (html) => {
         if (!html) return null;
-        const clean = DOMPurify.sanitize(html); // XSS 방지
+        const clean = DOMPurify.sanitize(html, { ADD_TAGS: ['img'], ADD_ATTR: ['src', 'alt', 'width', 'height', 'style'] });
         const doc = new DOMParser().parseFromString(clean, "text/html");
         const img = doc.querySelector("img");
         return img?.getAttribute("src") || null;
