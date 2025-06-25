@@ -12,6 +12,8 @@ import Signup from "./pages/Signup.jsx";
 import KakaoRedirect from "./pages/KakaoRedirect";
 import PasswordResetRequest from "./pages/PasswordResetRequest.jsx";
 import PasswordResetConfirm from "./pages/PasswordResetConfirm.jsx";
+import MyPage from "./pages/MyPage.jsx";
+import MyArticle from "./pages/MyArticle.jsx";
 
 function HeaderSelector() {
   const location = useLocation();
@@ -45,8 +47,16 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/oauth/kakao" element={<KakaoRedirect />} />
-        <Route path="/password-reset-request" element={<PasswordResetRequest />}/>
-        <Route path="/reset-password-confirm" element={<PasswordResetConfirm />}/>
+        <Route path="/my-page" element={<MyPage />} />
+        <Route path="/my-article" element={<MyArticle />} />
+        <Route
+          path="/password-reset-request"
+          element={<PasswordResetRequest />}
+        />
+        <Route
+          path="/reset-password-confirm"
+          element={<PasswordResetConfirm />}
+        />
       </Routes>
     </BrowserRouter>
   );
