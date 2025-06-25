@@ -5,7 +5,13 @@ export const articleApi = () => {
   // 게시판 목록 조회
   const getArticleListApi = async (filters = {}) => {
     // filters 구조 분해, 필요없는 값은 자동 제외
-    const { carType, carNames, carAges, articleTypes, sortType } = filters;
+    const { carType,
+      carNames,
+      carAges,
+      articleTypes,
+      sortType,
+      page = 0,
+      size = 12 } = filters;
 
     // params 객체 생성
     const params = {};
@@ -15,6 +21,9 @@ export const articleApi = () => {
     if (carAges && carAges.length) params.carAge = carAges; // 배열 가능
     if (articleTypes && articleTypes.length) params.articleType = articleTypes; // 배열/단일 모두 가능
     if (sortType) params.sortType = sortType;
+
+    params.page = page;
+    params.size = size;
 
     // axios에서 배열값은 carName=aa&carName=bb 형태로 변환해줌
     return await axios.get("/api/v1/article/list", {
