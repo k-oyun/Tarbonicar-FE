@@ -95,64 +95,52 @@ const IconGroup = styled.div`
   gap: 8px;
 `;
 
-const ArticleListItem = forwardRef(({ article }, ref) => {
-  const navigate = useNavigate();
+const ArticleListItem = forwardRef(({article}, ref) => {
+    const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate(`/article-view?id=${article.id}`);
-  };
+    const handleClick = () => {
+        navigate(`/article-view?id=${article.id}`);
+    }
 
-  // 본문에서 첫 번째 이미지 src 추출
-  const getFirstImageSrc = (html) => {
-    if (!html) return null;
-    const clean = DOMPurify.sanitize(html); // XSS 방지
-    const doc = new DOMParser().parseFromString(clean, "text/html");
-    const img = doc.querySelector("img");
-    return img?.getAttribute("src") || null;
-  };
+    // 본문에서 첫 번째 이미지 src 추출
+    const getFirstImageSrc = (html) => {
+        if (!html) return null;
+        const clean = DOMPurify.sanitize(html, { ADD_TAGS: ['img'], ADD_ATTR: ['src', 'alt', 'width', 'height', 'style'] });
+        const doc = new DOMParser().parseFromString(clean, "text/html");
+        const img = doc.querySelector("img");
+        return img?.getAttribute("src") || null;
+    };
 
-  const firstImg = getFirstImageSrc(article.content);
+    const firstImg = getFirstImageSrc(article.content);
 
-  const stripHtml = (html) => {
-    // 태그만 제거하고, 텍스트만 남김
-    const div = document.createElement("div");
-    div.innerHTML = DOMPurify.sanitize(html); // 혹시나 XSS 방지
-    return div.textContent || div.innerText || "";
-  };
+    const stripHtml = (html) => {
+        // 태그만 제거하고, 텍스트만 남김
+        const div = document.createElement("div");
+        div.innerHTML = DOMPurify.sanitize(html); // 혹시나 XSS 방지
+        return div.textContent || div.innerText || "";
+    }
 
-  return (
-    <Card ref={ref} onClick={handleClick}>
-      <Image
-        src={firstImg || defaultImage}
-        alt="차량 이미지"
-        $isDefault={!firstImg}
-      />
-      <Content>
-        <TagRow>
-          <Tag>#{article.carName || "차량"}</Tag>
-          <Tag>
-            #
-            {article.carAge
-              ? `${String(article.carAge).slice(-2)}년식`
-              : "연식"}
-          </Tag>
-        </TagRow>
-        <Title>{article.title || "제목 없음"}</Title>
-        <Text>{stripHtml(article.content || "내용 없음")}</Text>
+    return (
+        <Card ref={ref} onClick={handleClick}>
+            <Image src={firstImg || defaultImage} alt="차량 이미지" $isDefault={!firstImg}/>
+            <Content>
+                <TagRow>
+                    <Tag>#{article.carName || "차량"}</Tag>
+                    <Tag>#{article.carAge ? `${String(article.carAge).slice(-2)}년식` : "연식"}</Tag>
+                </TagRow>
+                <Title>{article.title || "제목 없음"}</Title>
+                <Text>{stripHtml(article.content || "내용 없음")}</Text>
 
-        <Bottom>
-          <span>
-            {article.createAt ? timeForToday(article.createAt) : "방금 전"}
-          </span>
-          <IconGroup>
-            <IconImage src={article.myLike ? like : unlike} alt="좋아요" />{" "}
-            {article.likeCount ?? 0}
-            <IconImage src={comment} alt="댓글" /> {article.commentCount ?? 0}
-          </IconGroup>
-        </Bottom>
-      </Content>
-    </Card>
-  );
+                <Bottom>
+                    <span>{article.createAt ? timeForToday(article.createAt) : "방금 전"}</span>
+                    <IconGroup>
+                        <IconImage src={article.myLike ? like : unlike} alt="좋아요" /> {article.likeCount ?? 0}
+                        <IconImage src={comment} alt="댓글" /> {article.commentCount ?? 0}
+                    </IconGroup>
+                </Bottom>
+            </Content>
+        </Card>
+    );
 });
 
 export default ArticleListItem;
