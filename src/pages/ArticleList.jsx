@@ -14,6 +14,7 @@ const Content = styled.div`
     padding-right: 30px;
     max-width: 1200px;
     margin: 0 auto;
+    
 `;
 
 // 필터 + 게시글 영역
@@ -32,9 +33,20 @@ const Layout = styled.div`
 const FilterArea = styled.div`
     width: 320px;
     margin-top: 30px;
+    
+    @media (min-width: 768px) {
+        position: sticky;
+        top: 170px;
+        transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: top;
+        z-index: 2;
+    }
 
     @media (max-width: 767px) {
         width: 100%;
+        position: static;
+        top: unset;
+        transition: none;
     }
 `;
 
@@ -43,6 +55,7 @@ const ContentArea = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding-bottom: 80px;
     @media (max-width: 767px) {
         width: 100%;
     }
@@ -167,6 +180,13 @@ const ArticleList = () => {
 
     // 모바일: 무한 스크롤로 누적
     const loadMoreArticles = async (targetPage, isReset = false) => {
+        if (isReset) {
+            setArticleList([]);
+            setPage(0);
+            setIsLastPage(false);
+            setTotalPages(1);
+            fetchList(0);
+        }
         if (isLoading || isLastPage) return;
         setIsLoading(true);
         try {
