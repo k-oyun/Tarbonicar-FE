@@ -68,10 +68,6 @@ const SortDropdown = ({ options, value, onChange, isOpen }) => {
   const isMobile = useMediaQuery({ query: "(max-width:767px)" });
 
   useEffect(() => {
-    console.log("자식", open);
-  }, [open]);
-
-  useEffect(() => {
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
         setOpen(false);
@@ -93,7 +89,6 @@ const SortDropdown = ({ options, value, onChange, isOpen }) => {
           setOpen((prev) => !prev);
 
           handleBtn();
-          console.log("open", open);
         }}
       >
         {selectedLabel || "정렬"}

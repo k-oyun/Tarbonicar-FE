@@ -56,9 +56,8 @@ const Content = styled.div`
 const SortWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 12px;
   position: absolute;
-  top: 18px;
+  top: 13px;
   right: 39px;
   z-index: 1000;
   height: ${(props) => (props.$isOpen ? "200px" : "20px")};
@@ -152,7 +151,8 @@ const MyArticle = () => {
   return (
     <Container>
       <BreadCrumb $ismobile={isMobile}>
-        홈 &gt; <a href="/my-page">마이페이지 &gt;</a>
+        홈 &gt; <a href="/my-page">마이페이지 </a>
+        &gt;
         <a href="/my-article"> 내가 작성한 글</a>
       </BreadCrumb>
 

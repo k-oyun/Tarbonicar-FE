@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import sahuruImg from "../assets/imgs/Sahuru.png";
 import { useMediaQuery } from "react-responsive";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,9 +10,9 @@ import {
 } from "../api/UpdateMemberInfo";
 import ConfirmDialog from "../components/ConfirmDialog";
 import axios from "../api/AxiosInstance";
-import { useUser } from "../context/UserContext";
 import profileIcon from "../assets/imgs/profileIcon.png";
-import { articleApi } from "../api/ArticleApi";
+import { articleApi } from "../api/articleApi";
+import { memberApi } from "../api/memberApi";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -119,7 +118,7 @@ const StatsBar = styled.div`
 `;
 
 const StatsItem = styled.div`
-  cursor: pointer;
+  cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
   font-size: ${(props) => (props.$ismobile ? "13px" : "14px")};
   font-weight: 600;
   text-align: left;
@@ -265,13 +264,18 @@ const ActionButton = styled.div`
   color: white;
   padding: 10px 20px;
   font-size: 14px;
-  margin-top: 10px;
+  margin-bottom: 7px;
+  margin-right: 5px;
   border: none;
   cursor: pointer;
 `;
 
 // const SideMenu = styled.div``;
 const MyPage = () => {
+  const [userInfo, setUserInfo] = useState({
+    nickname: "",
+    profileImage: "",
+  });
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -282,13 +286,10 @@ const MyPage = () => {
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [infoModalMessage, setInfoModalMessage] = useState("");
   const [infoReload, setInfoReload] = useState(false);
-
-  const { user, setUser } = useUser();
   const navigate = useNavigate();
-  const { getMyArticleCountApi } = articleApi();
+  const { getMyArticleCountApi, getMyTotalLikeCountApi } = articleApi();
+  const { userInfoGet } = memberApi();
   const [myArticleCount, setMyArticleCount] = useState(0);
-
-  const { getMyTotalLikeCountApi } = articleApi();
   const [myLikeCount, setMyLikeCount] = useState(0);
 
   const isMobile = useMediaQuery({
@@ -296,50 +297,47 @@ const MyPage = () => {
   });
 
   useEffect(() => {
+    const infoGet = async () => {
+      const resUser = await userInfoGet();
+      setUserInfo(resUser.data.data);
+      console.log(resUser);
+      const resMypage1 = await getMyArticleCountApi();
+      setMyArticleCount(resMypage1.data.data);
+      console.log(resMypage1);
+      const likeRes = await getMyTotalLikeCountApi();
+      setMyLikeCount(likeRes.data.data);
+    };
+
+    infoGet();
+  }, []);
+
+  useEffect(() => {
     console.log(isMobile);
   }, [isMobile]);
 
-  useEffect(() => {
-    const fetchMyArticleCount = async () => {
-      try {
-        const res = await getMyArticleCountApi();
-        setMyArticleCount(res.data.data); // 결과는 result 안에 있음
-      } catch (err) {
-        console.error("내 글 개수 불러오기 실패", err);
-      }
-    };
-    fetchMyArticleCount();
-  }, []);
-
-  useEffect(() => {
-    const fetchMyTotalLikes = async () => {
-      try {
-        const res = await getMyTotalLikeCountApi();
-        setMyLikeCount(res.data.data);
-      } catch (err) {
-        console.error("내 좋아요 수 불러오기 실패", err);
-      }
-    };
-    fetchMyTotalLikes();
-  }, []);
-
+  // 닉네임 변경
   const handleNicknameChange = async () => {
     try {
-      await updateNickname(nickname); // 서버에 닉네임 업데이트
-      setUser((prev) => ({ ...prev, nickname })); // Context 업데이트 → Header 자동 반영
+      await updateNickname(nickname.trim());
+      setUserInfo((u) => ({ ...u, nickname: nickname.trim() }));
       setInfoModalMessage("닉네임이 변경되었습니다.");
       setInfoReload(true);
     } catch (e) {
-      setInfoModalMessage("닉네임 변경을 실패했습니다.");
+      console.error(e);
+      setInfoModalMessage("닉네임 변경에 실패했습니다.");
       setInfoReload(false);
+    } finally {
+      setInfoModalOpen(true);
     }
-    setInfoModalOpen(true);
   };
+
+  // 비밀번호 변경
   const handlePasswordChange = async () => {
     if (password !== confirmPassword) {
       setInfoModalMessage("비밀번호가 틀렸습니다.");
+      setPassword("");
+      setConfirmPassword("");
       setInfoReload(false);
-
       setInfoModalOpen(true);
       return;
     }
@@ -354,6 +352,7 @@ const MyPage = () => {
     setInfoModalOpen(true);
   };
 
+  // 이미지 변경
   const handleImageChange = async () => {
     if (!selectedFile) {
       setInfoModalMessage("이미지를 먼저 선택해주세요.");
@@ -363,9 +362,9 @@ const MyPage = () => {
     }
 
     try {
-      const imageUrl = await updateProfileImage(selectedFile); // 서버 업로드
+      const imageUrl = await updateProfileImage(selectedFile); // 이미지 업로드
       setUserImg(imageUrl); // 미리보기 이미지 업데이트
-      setUser((prev) => ({ ...prev, profileImage: imageUrl })); // Context도 반영
+      // setUserInfo((prev) => ({ ...prev, profileImage: imageUrl })); // Context도 반영
       setInfoModalMessage("프로필 이미지가 변경되었습니다.");
       setInfoReload(true);
       setSelectedFile(null); // 상태 초기화
@@ -406,10 +405,10 @@ const MyPage = () => {
                   src={
                     userImg && userImg !== "null" && userImg.trim() !== ""
                       ? userImg
-                      : user.profileImage &&
-                        user.profileImage !== "null" &&
-                        user.profileImage.trim() !== ""
-                      ? user.profileImage
+                      : userInfo.profileImage &&
+                        userInfo.profileImage !== "null" &&
+                        userInfo.profileImage.trim() !== ""
+                      ? userInfo.profileImage
                       : profileIcon
                   }
                   alt="프로필 이미지"
@@ -425,7 +424,7 @@ const MyPage = () => {
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      setSelectedFile(file); // ✅ 여기서만 저장
+                      setSelectedFile(file); // 여기서만 저장
                       const reader = new FileReader();
                       reader.onloadend = () => {
                         setUserImg(reader.result); // 즉시 미리보기만
@@ -436,7 +435,7 @@ const MyPage = () => {
                 />
               </ImageUploadWrapper>
               <ButtonGroup>
-                <CancelButton>취소</CancelButton>
+                {/* <CancelButton>취소</CancelButton> */}
                 <ActionButton onClick={handleImageChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
@@ -458,7 +457,7 @@ const MyPage = () => {
                 />
               </InputRow>
               <ButtonGroup>
-                <CancelButton>취소</CancelButton>
+                {/* <CancelButton>취소</CancelButton> */}
                 <ActionButton onClick={handleNicknameChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
@@ -477,6 +476,7 @@ const MyPage = () => {
                   $ismobile={isMobile}
                   id="password"
                   type="password"
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <br />
@@ -488,11 +488,12 @@ const MyPage = () => {
                   $withRightMargin
                   id="confirmPassword"
                   type="password"
+                  value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </InputRow>
               <ButtonGroup>
-                <CancelButton>취소</CancelButton>
+                {/* <CancelButton>취소</CancelButton> */}
                 <ActionButton onClick={handlePasswordChange}>변경</ActionButton>
               </ButtonGroup>
             </ProfileSection>
@@ -511,7 +512,9 @@ const MyPage = () => {
         </BreadCrumb>
         <TitleSection>
           <Title>마이페이지</Title>
-          <Subtitle>이용 중인 타보니까를 어쩌구 저쩌구 ㄴㅇㅁㅇㄴ</Subtitle>
+          <Subtitle>
+            타보니까의 등록된 회원님의 정보를 수정할 수 있습니다.
+          </Subtitle>
         </TitleSection>
         <Content $ismobile={isMobile}>
           <SideMenu $ismobile={isMobile}>
@@ -550,14 +553,19 @@ const MyPage = () => {
           </SideMenu>
           <MainSection>
             <h3>
-              <strong>{user.nickname}</strong>님, 안녕하세요!
+              <strong>{userInfo.nickname}</strong>님, 안녕하세요!
             </h3>
             <StatsBar>
               <StatsItem
                 onClick={() => navigate("/my-article")}
                 $ismobile={isMobile}
               >
-                <span>내가 작성한 글 &gt;</span>
+                <span
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/my-article")}
+                >
+                  내가 작성한 글 &gt;
+                </span>
                 <MyArticles $ismobile={isMobile}>{myArticleCount}개</MyArticles>
               </StatsItem>
               <StatsItem $ismobile={isMobile}>

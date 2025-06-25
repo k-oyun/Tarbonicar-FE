@@ -147,7 +147,7 @@ const Header = ({
   };
 
   const onClickMypage = () => {
-    naviagate("/mypage");
+    naviagate("/my-page");
   };
 
   useEffect(() => {
@@ -158,6 +158,8 @@ const Header = ({
     };
 
     InfoGet();
+    const token = localStorage.getItem("accessToken");
+    console.log("header", token);
   }, []);
 
   const handleLogout = () => {
@@ -225,7 +227,7 @@ const Header = ({
       </HeaderContainer>
       {isPopupOpen ? (
         <Popup $ismobile={isMobile}>
-          <PopupBtn>
+          <PopupBtn onClick={onClickMypage}>
             <PopupImg src={profileIcon} $width="20px" $mr="5px" />
             마이페이지
           </PopupBtn>
