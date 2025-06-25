@@ -1,23 +1,26 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import userAvatar from "../assets/imgs/Sahuru.png";
+import profileIcon from "../assets/imgs/profileIcon.png";
 
 const OuterBox = styled.div`
     border: 1.5px solid #CCCCCC;
     border-radius: 10px;
+    height: auto;
     padding: 18px;
     margin-top: 20px;
     background: #fff;
     margin-bottom: 18px;
+    overflow: hidden;
 `;
 
 const TopRow = styled.div`
     width: 100%;
     display: flex;
-    margin-left: 10px;
     align-items: center;
     gap: 10px;
     margin-bottom: 6px;
+    padding-left: 4px;
+    padding-right: 4px;
 `;
 
 const Avatar = styled.img`
@@ -35,16 +38,19 @@ const Nickname = styled.span`
 
 const InputBox = styled.textarea`
     width: 100%;
-    min-height: 46px;
-    max-height: 80px;
-    resize: none;
     border: none;
+    height: 100px;
     background: #ffffff;
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 15px;
     outline: none;
     margin-bottom: 0;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    //word-break: break-word;
+    overflow: hidden;
+    resize: none;
 `;
 
 const BottomRow = styled.div`
@@ -90,7 +96,7 @@ const CommentInput = ({ onSubmit, avatar, nickname = "닉네임", disabled }) =>
         <OuterBox>
             <form onSubmit={handleSubmit}>
                 <TopRow>
-                    <Avatar src={avatar || userAvatar} alt="프로필" />
+                    <Avatar src={avatar || profileIcon} alt="프로필" />
                     <Nickname>{nickname}</Nickname>
                 </TopRow>
                 <InputBox

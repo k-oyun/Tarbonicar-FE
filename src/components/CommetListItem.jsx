@@ -1,6 +1,6 @@
 import React, {forwardRef, useState} from "react";
 import styled from "styled-components";
-import defaultAvatar from "../assets/imgs/Sahuru.png";
+import profileIcon from "../assets/imgs/profileIcon.png";
 import {timeForToday} from "../utils/timeForToday.js";
 
 const Wrapper = styled.div`
@@ -104,7 +104,7 @@ const CommentListItem = forwardRef((
             <Wrapper ref={ref}>
                 <Body>
                     <TopRow>
-                        <Avatar src={comment.profileImage || defaultAvatar} alt="프로필" />
+                        <Avatar src={comment.profileImage || profileIcon} alt="프로필" />
                         <Nickname>{comment.nickname}</Nickname>
                     </TopRow>
                     <EditInputRow>
@@ -130,7 +130,7 @@ const CommentListItem = forwardRef((
         <Wrapper ref={ref}>
             <Body>
                 <TopRow>
-                    <Avatar src={comment.profileImage || defaultAvatar} alt="프로필" />
+                    <Avatar src={comment.profileImage || profileIcon} alt="프로필" />
                     <Nickname>{comment.nickname}</Nickname>
                 </TopRow>
                 <Content>{comment.content}</Content>
