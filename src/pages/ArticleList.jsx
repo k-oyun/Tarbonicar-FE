@@ -33,8 +33,19 @@ const FilterArea = styled.div`
   width: 320px;
   margin-top: 30px;
 
+  @media (min-width: 768px) {
+    position: sticky;
+    top: 170px;
+    transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: top;
+    z-index: 2;
+  }
+
   @media (max-width: 767px) {
     width: 100%;
+    position: static;
+    top: unset;
+    transition: none;
   }
 `;
 
@@ -43,6 +54,7 @@ const ContentArea = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-bottom: 80px;
   @media (max-width: 767px) {
     width: 100%;
   }

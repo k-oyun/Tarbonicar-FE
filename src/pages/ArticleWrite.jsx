@@ -56,6 +56,7 @@ const TitleInput = styled.input`
 
 const Controls = styled.div`
     position:relative; z-index:2000; display:flex; flex-direction:column; gap:16px; margin-bottom:16px;
+    overflow-x: hidden;
     @media (max-width:${MOBILE_MAX}){gap:8px; margin-bottom:12px;}
 `;
 
@@ -232,6 +233,19 @@ export default function ArticleWrite() {
             onCancel : ()=>setDialog({isOpen:false})
         });
     };
+
+    // 비로그인 상태 체크
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+            openDialog({
+                title: "오류",
+                message: "로그인 후 이용이 가능합니다.",
+                isRedButton: true,
+                onConfirm: () => window.location.replace("/login")
+            });
+        }
+    }, []);
 
     // 작성/수정 처리
     const handleSubmit = () => {

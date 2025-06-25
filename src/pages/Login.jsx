@@ -56,6 +56,14 @@ const Kakao = styled.img`
   margin-right: 4px;
 `;
 
+// 에러메시지
+const ErrorText = styled.div`
+  color: #e20000;
+  font-size: 10px;
+  margin: 2px 0 8px 4px;
+  text-align: right;
+`;
+
 // 이메일, 비밀번호 입력박스
 const InputBox = styled.div`
   display: flex;
@@ -63,7 +71,7 @@ const InputBox = styled.div`
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 0 15px;
-  margin-bottom: 10px;
+  margin-bottom: ${(props) => (props.$error ? "2px" : "10px")};
   background-color: #fff;
 
   &:hover {
@@ -139,10 +147,31 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [dialog, setDialog] = useState({ isOpen: false });
 
+  const [emailError, setEmailError] = useState("");
+  const [pwError, setPwError] = useState("");
+
+  const validateEmail = (email) => {
+    const trimmed = email.trim();
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(trimmed);
+  };
+
+  const validatePassword = (password) => {
+    const trimmed = password.trim();
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':",.<>?]).{8,}$/;
+    return regex.test(trimmed);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await memberApi().login({ email, password });
+      const res = await memberApi().login({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
       const accessToken = res.data.data.accessToken;
       const refreshToken = res.data.data.refreshToken;
 
@@ -152,19 +181,21 @@ const Login = () => {
 
         navigate("/");
       } else {
-        setDialog({
-          isOpen: true,
-          title: "로그인 실패",
-          message: "토큰이 존재하지 않습니다.",
-          isRedButton: true,
-          onConfirm: () => setDialog({ isOpen: false }),
-        });
+        throw new Error("토큰이 존재하지 않습니다.");
       }
     } catch (err) {
+      const msg = err.response?.data?.message;
+      let errorMessage = "로그인 중 오류가 발생했습니다.";
+
+      if (msg === "존재하지 않는 사용자 입니다.") {
+        errorMessage = "등록되지 않은 이메일입니다.";
+      } else if (msg === "비밀번호가 일치하지 않습니다.") {
+        errorMessage = "비밀번호가 일치하지 않습니다.";
+      }
       setDialog({
         isOpen: true,
         title: "로그인 실패",
-        message: err.response?.data?.message || err.message,
+        message: errorMessage,
         isRedButton: true,
         onConfirm: () => setDialog({ isOpen: false }),
       });
@@ -173,12 +204,10 @@ const Login = () => {
 
   const handleKakaoLogin = async () => {
     try {
-      // 1. 카카오 인가코드 받기
       const clientId = import.meta.env.VITE_KAKAO_REST_API_KEY;
       const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
 
-      // 2. 새 창으로 카카오 로그인 띄우기
       window.location.href = kakaoAuthUrl;
     } catch (err) {
       setDialog({
@@ -196,29 +225,58 @@ const Login = () => {
       <LoginBox $isMobile={isMobile}>
         <Logo src={logoImgDark} alt="로고 이미지" />
         <form onSubmit={handleLogin}>
-          <InputBox>
+          <InputBox $error={!!emailError}>
             <Email src={emailIcon} alt="이메일 아이콘" />
             <Input
               type="email"
               placeholder="이메일을 입력해주세요."
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError("");
+              }}
+              onBlur={() => {
+                if (!email.trim()) {
+                  setEmailError("이메일을 입력해주세요.");
+                } else if (!validateEmail(email)) {
+                  setEmailError("올바른 이메일 형식을 입력해주세요.");
+                } else {
+                  setEmailError("");
+                }
+              }}
             />
           </InputBox>
+          {emailError && <ErrorText>{emailError}</ErrorText>}
 
-          <InputBox>
+          <InputBox $error={!!pwError}>
             <Password src={passwordIcon} alt="비밀번호 아이콘" />
             <Input
               type="password"
               placeholder="비밀번호를 입력해주세요."
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPwError("");
+              }}
+              onFocus={() => {
+                if (!email.trim()) setEmailError("이메일을 입력해주세요.");
+                else if (!validateEmail(email))
+                  setEmailError("올바른 이메일 형식을 입력해주세요.");
+              }}
+              onBlur={() => {
+                if (!password.trim()) setPwError("비밀번호를 입력해주세요.");
+                else if (!validatePassword(password))
+                  setPwError(
+                    "비밀번호는 대소문자·숫자·특수문자 포함 8자 이상이어야 합니다."
+                  );
+              }}
             />
           </InputBox>
+          {pwError && <ErrorText>{pwError}</ErrorText>}
 
-          <SubText>아이디 or 비밀번호 재설정</SubText>
+          <SubText onClick={() => navigate("/password-reset-request")}>
+            비밀번호 재설정
+          </SubText>
 
           <LoginButton type="submit" disabled={!email || !password}>
             로그인

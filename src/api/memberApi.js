@@ -40,7 +40,33 @@ export const memberApi = () => {
     });
   };
 
-  return { signup, login, kakaoLogin, checkEmail };
+  const userInfoGet = async () => {
+    return await axios.get("/api/v1/member/user-info");
+  };
+
+  // 비밀번호 재설정 링크 요청
+  const passwordResetEmailRequest = async ({ email }) => {
+    return await axios.post("/api/v1/password-reset/email-request", {
+      email,
+    });
+  };
+
+  // 이메일 인증 코드 검증
+  const passwordResetEmailConfirm = async ({ code }) => {
+    return await axios.post("/api/v1/password-reset/email-confirm", {
+      code,
+    });
+  };
+
+  // 새로운 비밀번호 설정
+  const passwordReset = async ({ code, newPassword }) => {
+    return await axios.post("/api/v1/password-reset/password-reset", {
+      code,
+      newPassword,
+    });
+  };
+
+  return { signup, login, kakaoLogin, checkEmail, passwordResetEmailRequest, passwordResetEmailConfirm, passwordReset, userInfoGet };
 };
 
 export default memberApi;

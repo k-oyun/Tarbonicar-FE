@@ -6,7 +6,7 @@ import { useMediaQuery } from "react-responsive";
 import "ckeditor5/ckeditor5.css";
 
 // assets
-import userAvatar  from "../assets/imgs/Sahuru.png";
+import profileIcon from "../assets/imgs/profileIcon.png";
 import likeIcon    from "../assets/imgs/Like.png";
 import unlikeIcon   from "../assets/imgs/Unlike.png";
 import commentIcon from "../assets/imgs/Comment.png";
@@ -17,6 +17,7 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import {commentApi} from "../api/commentApi.js";
 import {articleApi} from "../api/articleApi.js";
 import {Pagination} from "@mui/material";
+import memberApi from "../api/memberApi.js";
 
 const GlobalStyle = createGlobalStyle`
     @import url('https://fonts.googleapis.com/css2?family=Oswald&family=Lato:wght@300;400;700&display=swap');
@@ -152,6 +153,8 @@ const ArticleView = () => {
 
     // 댓글
     const { getCommentList, postComment, putComment, deleteComment } = commentApi();
+    const { userInfoGet } = memberApi();
+    const [userInfo, setUserInfo] = useState(null);
     const [comments, setComments] = useState([]);
     const [commentPage, setCommentPage] = useState(0);         // 현재 페이지 (0부터 시작)
     const [commentPageSize] = useState(20);                    // 한 페이지에 보여줄 댓글 수
@@ -209,6 +212,18 @@ const ArticleView = () => {
         }
         // isMobile이 바뀔 때마다 실행
     }, [isMobile, id]);
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            userInfoGet()
+                .then(res => {
+                    if (res.data.success) {
+                        setUserInfo(res.data.data);
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [isLoggedIn]);
 
     const fetchComments = (page = 0) => {
         getCommentList(id, page, commentPageSize)
@@ -412,7 +427,7 @@ const ArticleView = () => {
 
                 <MetaRow $ismobile={isMobile}>
                     <AuthorRow>
-                        <Avatar src={article.profileImage || userAvatar} alt="작성자" $ismobile={isMobile}/>
+                        <Avatar src={article.profileImage || profileIcon} alt="작성자" $ismobile={isMobile}/>
                         <AuthorInfo $ismobile={isMobile}>
                             <span>{article.nickname}</span>
                             <span>{timeForToday(article.createdAt)}{article.modify && " (수정됨)"}</span>
@@ -452,8 +467,8 @@ const ArticleView = () => {
                 {isLoggedIn && (
                     <CommentInput
                         onSubmit={handleCommentSubmit}
-                        avatar={article.profileImage}
-                        nickname={article.nickname}
+                        avatar={userInfo?.profileImage || profileIcon}
+                        nickname={userInfo?.nickname || "(알수없음)"}
                     />
                 )}
 
