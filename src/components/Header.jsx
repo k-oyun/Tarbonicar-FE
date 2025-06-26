@@ -158,12 +158,11 @@ const Header = ({
     };
 
     InfoGet();
-    const token = localStorage.getItem("accessToken");
-    console.log("header", token);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     setIsModalOpen(true);
   };
 

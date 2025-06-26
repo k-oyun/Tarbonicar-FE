@@ -192,7 +192,6 @@ const Main = () => {
     };
 
     typeGet();
-    console.log("dasdas", carType);
   }, []);
 
   useEffect(() => {
