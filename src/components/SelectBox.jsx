@@ -22,6 +22,7 @@ const SelectBoxButton = styled.button`
   cursor: pointer;
   padding-left: 20px;
   font-size: 13px;
+  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
 `;
 
 const SelectBoxList = styled.div`
@@ -66,6 +67,7 @@ const SelectBox = ({
   isSelected,
   onClick,
   width,
+  disabled,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectBoxRef = useRef(null);
@@ -91,14 +93,16 @@ const SelectBox = ({
     <SelectBoxContainer ref={selectBoxRef}>
       <SelectBoxButton
         onClick={(e) => {
+          if (disabled) return;
           setIsOpen((prev) => !prev);
           onClick?.(e);
         }}
         $isSelected={isSelected}
+        $disabled={disabled}
       >
         {selectedLabel || placeholder}
       </SelectBoxButton>
-      {isOpen ? (
+      {isOpen && !disabled ? (
         <SelectBoxList $isOpen={isOpen} $isSelected={isSelected} $width={width}>
           {options.map((opt) => (
             <SelectBoxItem
