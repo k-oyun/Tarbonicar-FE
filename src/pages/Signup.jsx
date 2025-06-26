@@ -119,12 +119,15 @@ const EmailInput = styled.input`
 `;
 
 const CheckButton = styled.button`
-  padding: 10px 16px;
+  /* padding: 10px 16px; */
+  padding: ${(props) => (props.$isMobile ? "6px 10px" : "10px 16px")};
+  font-size: ${(props) => (props.$isMobile ? "12px" : "14px")};
   background-color: #002c5f;
   color: white;
   font-weight: bold;
   border: 1px solid #002c5f;
   cursor: pointer;
+  white-space: nowrap;
   &:hover {
     background-color: #001e3e;
   }
@@ -398,7 +401,6 @@ const Signup = () => {
               >
                 {step}
               </StepNumber>
-              {/* 마지막 스텝 전까지만 선 추가 */}
               {step < 5 && <StepLine $isPast={currentStep > step} />}
             </StepCircleWrapper>
 
@@ -425,7 +427,10 @@ const Signup = () => {
                       onChange={handleEmailChange}
                       ref={(el) => (inputRefs.current[0] = el)}
                     />
-                    <CheckButton onClick={handleEmailCheck}>
+                    <CheckButton
+                      $isMobile={isMobile}
+                      onClick={handleEmailCheck}
+                    >
                       중복 확인
                     </CheckButton>
                   </InputRow>
@@ -434,33 +439,53 @@ const Signup = () => {
               )}
               {step === 2 && currentStep === 2 && (
                 <>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    ref={(el) => (inputRefs.current[1] = el)} //
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && passwordValid) {
-                        moveToNextStep(3);
-                      }
-                    }}
-                  />
+                  <InputRow>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={handlePasswordChange}
+                      ref={(el) => (inputRefs.current[1] = el)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && passwordValid) {
+                          moveToNextStep(3);
+                        }
+                      }}
+                    />
+                    <CheckButton
+                      $isMobile={isMobile}
+                      onClick={() => {
+                        if (passwordValid) moveToNextStep(3);
+                      }}
+                    >
+                      확인
+                    </CheckButton>
+                  </InputRow>
                   {passwordError && <ErrorMsg>{passwordError}</ErrorMsg>}
                 </>
               )}
               {step === 3 && currentStep === 3 && (
                 <>
-                  <Input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                    ref={(el) => (inputRefs.current[2] = el)} //
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && confirmPassword === password) {
-                        moveToNextStep(4);
-                      }
-                    }}
-                  />
+                  <InputRow>
+                    <Input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={handleConfirmPasswordChange}
+                      ref={(el) => (inputRefs.current[2] = el)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && confirmPassword === password) {
+                          moveToNextStep(4);
+                        }
+                      }}
+                    />
+                    <CheckButton
+                      $isMobile={isMobile}
+                      onClick={() => {
+                        if (confirmPassword === password) moveToNextStep(4);
+                      }}
+                    >
+                      다음
+                    </CheckButton>
+                  </InputRow>
                   {!passwordsMatch && confirmPassword && (
                     <ErrorMsg>비밀번호가 일치하지 않습니다.</ErrorMsg>
                   )}
@@ -468,17 +493,27 @@ const Signup = () => {
               )}
               {step === 4 && currentStep === 4 && (
                 <>
-                  <Input
-                    type="text"
-                    value={nickname}
-                    onChange={handleNicknameChange}
-                    ref={(el) => (inputRefs.current[3] = el)} //
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && nickname.length >= 2) {
-                        moveToNextStep(5);
-                      }
-                    }}
-                  />
+                  <InputRow>
+                    <Input
+                      type="text"
+                      value={nickname}
+                      onChange={handleNicknameChange}
+                      ref={(el) => (inputRefs.current[3] = el)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && nickname.length >= 2) {
+                          moveToNextStep(5);
+                        }
+                      }}
+                    />
+                    <CheckButton
+                      $isMobile={isMobile}
+                      onClick={() => {
+                        if (nickname.length >= 2) moveToNextStep(5);
+                      }}
+                    >
+                      다음
+                    </CheckButton>
+                  </InputRow>
                   {nicknameError && <ErrorMsg>{nicknameError}</ErrorMsg>}
                 </>
               )}
