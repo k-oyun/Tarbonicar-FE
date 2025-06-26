@@ -346,24 +346,24 @@ export default function ArticleWrite() {
                         />
 
                         <SelectBox
-                            options={vehicleDisabled?[]:carNames.map(c=>({value:c.carName,label:c.carName}))}
+                            options={vehicleDisabled ? [] : carNames.map(c=>({value: c.carName, label: c.carName}))}
                             placeholder="차량"
                             value={selectedCarName}
                             onSelect={setSelectedCarName}
                             isSelected={selectedCarName}
                             disabled={vehicleDisabled}
-                            onClick={vehicleDisabled?undefined:handleSelectBox}
+                            onClick={vehicleDisabled ? undefined : handleSelectBox}
                             width={selectWidth}
                         />
 
                         <SelectBox
-                            options={ageDisabled?[]:carAges.map(a=>({value:a.id,label:`${a.carAge}년식`}))}
+                            options={ageDisabled ? [] : carAges.map(a=>({value: a.id, label: `${a.carAge}년식`}))}
                             placeholder="연식"
                             value={selectedCarAge}
                             onSelect={setSelectedCarAge}
                             isSelected={selectedCarAge}
                             disabled={ageDisabled}
-                            onClick={ageDisabled?undefined:handleSelectBox}
+                            onClick={ageDisabled ? undefined : handleSelectBox}
                             width={selectWidth}
                         />
                     </SelectsContainer>
