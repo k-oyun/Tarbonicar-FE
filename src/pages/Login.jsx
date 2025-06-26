@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import logoImgDark from "../assets/imgs/logoDark.png";
 import emailIcon from "../assets/imgs/emailIcon.svg";
 import passwordIcon from "../assets/imgs/passwordIcon.svg";
+import passwordEyeIcon from "../assets/imgs/passwordEye.svg";
+import passwordEyeCloseIcon from "../assets/imgs/passwordEye2.svg";
 import kakaoIcon from "../assets/imgs/kakaoIcon.svg";
 import memberApi from "../api/memberApi";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -66,6 +68,7 @@ const ErrorText = styled.div`
 
 // 이메일, 비밀번호 입력박스
 const InputBox = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
   border: 1px solid #ccc;
@@ -149,6 +152,26 @@ const Login = () => {
 
   const [emailError, setEmailError] = useState("");
   const [pwError, setPwError] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const PasswordInputWrapper = styled.div`
+    position: relative;
+    width: 100%;
+  `;
+
+  const ToggleButton = styled.button`
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
 
   const validateEmail = (email) => {
     const trimmed = email.trim();
@@ -251,7 +274,7 @@ const Login = () => {
           <InputBox $error={!!pwError}>
             <Password src={passwordIcon} alt="비밀번호 아이콘" />
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="비밀번호를 입력해주세요."
               value={password}
               onChange={(e) => {
@@ -271,6 +294,16 @@ const Login = () => {
                   );
               }}
             />
+            <ToggleButton
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              <img
+                src={showPassword ? passwordEyeIcon : passwordEyeCloseIcon}
+                alt="비밀번호 보기 전환"
+                style={{ width: "16px", height: "16px" }}
+              />
+            </ToggleButton>
           </InputBox>
           {pwError && <ErrorText>{pwError}</ErrorText>}
 
