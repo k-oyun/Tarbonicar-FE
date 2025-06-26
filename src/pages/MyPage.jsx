@@ -292,6 +292,10 @@ const MyPage = () => {
   const [myArticleCount, setMyArticleCount] = useState(0);
   const [myLikeCount, setMyLikeCount] = useState(0);
 
+  const nicknamePattern = /^.{2,20}$/;
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
@@ -317,6 +321,20 @@ const MyPage = () => {
 
   // 닉네임 변경
   const handleNicknameChange = async () => {
+    const trimmed = nickname.trim();
+    if (!trimmed) {
+      setInfoModalMessage("닉네임을 입력해주세요.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      return;
+    }
+    if (!nicknamePattern.test(trimmed)) {
+      setInfoModalMessage("닉네임은 2~20자 사이로 입력해주세요.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      return;
+    }
+
     try {
       await updateNickname(nickname.trim());
       setUserInfo((u) => ({ ...u, nickname: nickname.trim() }));
@@ -333,19 +351,47 @@ const MyPage = () => {
 
   // 비밀번호 변경
   const handlePasswordChange = async () => {
+    if (!password.trim()) {
+      setInfoModalMessage("비밀번호를 입력해주세요.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      return;
+    }
+    if (!confirmPassword.trim()) {
+      setInfoModalMessage("비밀번호 확인을 입력해주세요.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setInfoModalMessage("비밀번호가 틀렸습니다.");
+      setInfoModalMessage(
+        "입력하신 비밀번호가 일치하지 않습니다. 다시 확인해주세요."
+      );
       setPassword("");
       setConfirmPassword("");
       setInfoReload(false);
       setInfoModalOpen(true);
       return;
     }
+
+    if (!passwordPattern.test(password)) {
+      setInfoModalMessage(
+        "비밀번호는 영문 대소문자, 숫자, 특수문자를 포함해 8자 이상이어야 합니다."
+      );
+      setPassword("");
+      setConfirmPassword("");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      return;
+    }
+
     try {
       await updatePassword(password, confirmPassword);
       setInfoModalMessage("비밀번호가 변경되었습니다.");
       setInfoReload(true);
     } catch (e) {
+      console.error(e);
       setInfoModalMessage("비밀번호 변경 중 오류가 발생했습니다.");
       setInfoReload(false);
     }
@@ -355,7 +401,7 @@ const MyPage = () => {
   // 이미지 변경
   const handleImageChange = async () => {
     if (!selectedFile) {
-      setInfoModalMessage("이미지를 먼저 선택해주세요.");
+      setInfoModalMessage("업로드할 프로필 사진을 선택해주세요.");
       setInfoReload(false);
       setInfoModalOpen(true);
       return;
@@ -368,8 +414,9 @@ const MyPage = () => {
       setInfoModalMessage("프로필 이미지가 변경되었습니다.");
       setInfoReload(true);
       setSelectedFile(null); // 상태 초기화
-    } catch (err) {
-      setInfoModalMessage("이미지 변경 중 오류가 발생했습니다.");
+    } catch (e) {
+      console.log(e);
+      setInfoModalMessage("프로필 이미지 변경 중 오류가 발생했습니다.");
       setInfoReload(false);
     }
     setInfoModalOpen(true);
@@ -453,6 +500,7 @@ const MyPage = () => {
                 <InputField
                   $ismobile={isMobile}
                   id="nickname"
+                  value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                 />
               </InputRow>
@@ -574,7 +622,7 @@ const MyPage = () => {
               </StatsItem>
               <StatsItem $ismobile={isMobile}>
                 <span>1:1 문의 내역 &gt;</span>
-                <MyInquiries $ismobile={isMobile}>25개</MyInquiries>
+                <MyInquiries $ismobile={isMobile}>0개</MyInquiries>
               </StatsItem>
             </StatsBar>
             <ContentWrapper>{renderMainContent()}</ContentWrapper>
