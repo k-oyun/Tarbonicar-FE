@@ -66,7 +66,16 @@ export const memberApi = () => {
     });
   };
 
-  return { signup, login, kakaoLogin, checkEmail, passwordResetEmailRequest, passwordResetEmailConfirm, passwordReset, userInfoGet };
+  return {
+    signup,
+    login,
+    kakaoLogin,
+    checkEmail,
+    passwordResetEmailRequest,
+    passwordResetEmailConfirm,
+    passwordReset,
+    userInfoGet,
+  };
 };
 
 export default memberApi;
