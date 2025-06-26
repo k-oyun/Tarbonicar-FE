@@ -9,6 +9,7 @@ import Header from "../components/Header";
 import { useMediaQuery } from "react-responsive";
 import useMainApi from "../api/main";
 import { useNavigate } from "react-router-dom";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const MainContainer = styled.div`
   width: 100%;
@@ -119,6 +120,8 @@ const Main = () => {
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [isReviewVisible, setIsReviewVisible] = useState(false);
+  const [isModalOn, setIsModalOn] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState(true);
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
   });
@@ -138,6 +141,11 @@ const Main = () => {
       navigate("/article-list", {
         state: { type: selectedType, name: selectedModel, year: selectedYear },
       });
+    } else {
+      if (!isFirstTime) {
+        setIsModalOn(true);
+      }
+      setIsFirstTime(false);
     }
   };
 
@@ -145,7 +153,6 @@ const Main = () => {
     if (selectedType && selectedModel && selectedYear !== "") {
       setIsBtnVisible(true);
     }
-    console.log(selectedType, selectedModel, selectedYear);
   }, [selectedType, selectedModel, selectedYear]);
 
   useEffect(() => {
@@ -234,6 +241,18 @@ const Main = () => {
       ageGet();
     }
   }, [selectedModel]);
+
+  useEffect(() => {
+    if (selectedType !== "all") {
+      setSelectedModel("");
+    }
+  }, [selectedType]);
+
+  useEffect(() => {
+    if (selectedModel !== "all") {
+      setSelectedYear("");
+    }
+  }, [selectedModel]);
   return (
     <>
       <Header
@@ -280,6 +299,7 @@ const Main = () => {
               value={selectedType}
               onSelect={(val) => setSelectedType(val)}
               isSelected={selectedType}
+              disabled={false}
               placeholder="차종"
               width={"110px"}
               onClick={() => {
@@ -291,6 +311,7 @@ const Main = () => {
               value={selectedModel}
               onSelect={(val) => setSelectedModel(val)}
               isSelected={selectedModel}
+              disabled={selectedType === "" ? true : false}
               placeholder="차량"
               width={"110px"}
               onClick={() => {
@@ -304,6 +325,7 @@ const Main = () => {
                 setSelectedYear(val);
               }}
               isSelected={selectedYear}
+              disabled={selectedModel === "" ? true : false}
               placeholder="연식"
               width={"110px"}
               onClick={() => {
@@ -320,6 +342,17 @@ const Main = () => {
           </WatchReviewBtn>
         </ReviewContainer>
       </MainContainer>
+
+      <ConfirmDialog
+        isOpen={isModalOn}
+        title="알림"
+        message="차종, 모델, 연식을 전부 선택해 주세요!"
+        onConfirm={() => {
+          setIsModalOn((prev) => !prev);
+        }}
+        showCancel={false}
+        isRedButton={false}
+      />
     </>
   );
 };
