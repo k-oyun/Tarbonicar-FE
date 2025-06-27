@@ -9,10 +9,11 @@ import {
   deleteMember,
 } from "../api/UpdateMemberInfo";
 import ConfirmDialog from "../components/ConfirmDialog";
-import axios from "../api/AxiosInstance";
 import profileIcon from "../assets/imgs/profileIcon.png";
 import { articleApi } from "../api/articleApi";
 import { memberApi } from "../api/memberApi";
+import passwordEyeIcon from "../assets/imgs/passwordEye.svg";
+import passwordEyeCloseIcon from "../assets/imgs/passwordEye2.svg";
 
 const Container = styled.div`
   /* max-width: 900px; */
@@ -232,6 +233,14 @@ const InputLabel = styled.label`
   font-weight: bold;
 `;
 
+const PasswordInputFieldWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+  width: 40%;
+  margin-top: 10px;
+  margin-right: ${(props) => (props.$withRightMargin ? "32px" : "")};
+`;
+
 const InputField = styled.input`
   padding: 5px;
   width: 40%;
@@ -239,6 +248,23 @@ const InputField = styled.input`
   font-size: 14px;
   border: 2px solid #ddd;
   margin-right: ${(props) => (props.$withRightMargin ? "32px" : "")};
+`;
+
+const PasswordInputField = styled.input`
+  padding: 5px 30px 5px 5px;
+  width: 100%;
+  font-size: 14px;
+  border: 2px solid #ddd;
+  box-sizing: border-box;
+`;
+const EyeIcon = styled.img`
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 `;
 
 const ButtonGroup = styled.div`
@@ -279,6 +305,8 @@ const MyPage = () => {
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userImg, setUserImg] = useState("");
   const [selectedMenu, setSelectedMenu] = useState("프로필");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -407,6 +435,26 @@ const MyPage = () => {
       return;
     }
 
+    // 파일 형식 검사
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(selectedFile.type)) {
+      setInfoModalMessage("이미지는 JPG, JPEG, PNG 형식만 업로드 가능합니다.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      setSelectedFile(null);
+      return;
+    }
+
+    // 파일 크기 검사 (5MB 이하)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (selectedFile.size > maxSize) {
+      setInfoModalMessage("이미지는 5MB 이하만 업로드 가능합니다.");
+      setInfoReload(false);
+      setInfoModalOpen(true);
+      setSelectedFile(null);
+      return;
+    }
+
     try {
       const imageUrl = await updateProfileImage(selectedFile); // 이미지 업로드
       setUserImg(imageUrl); // 미리보기 이미지 업데이트
@@ -520,25 +568,40 @@ const MyPage = () => {
               <BorderLine />
               <InputRow>
                 <InputLabel htmlFor="password">비밀번호: </InputLabel>
-                <InputField
-                  $ismobile={isMobile}
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <br />
+                <PasswordInputFieldWrapper>
+                  <PasswordInputField
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <EyeIcon
+                    src={showPassword ? passwordEyeIcon : passwordEyeCloseIcon}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    alt="toggle password visibility"
+                  />
+                </PasswordInputFieldWrapper>
+                <br></br>
                 <InputLabel htmlFor="confirmPassword">
                   비밀번호 확인:{" "}
                 </InputLabel>
-                <InputField
-                  $ismobile={isMobile}
-                  $withRightMargin
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <PasswordInputFieldWrapper $withRightMargin>
+                  <PasswordInputField
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <EyeIcon
+                    src={
+                      showConfirmPassword
+                        ? passwordEyeIcon
+                        : passwordEyeCloseIcon
+                    }
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    alt="toggle confirm password visibility"
+                  />
+                </PasswordInputFieldWrapper>
               </InputRow>
               <ButtonGroup>
                 {/* <CancelButton>취소</CancelButton> */}
