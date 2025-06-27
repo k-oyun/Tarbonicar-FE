@@ -142,6 +142,24 @@ const BottomText = styled.div`
   cursor: pointer;
 `;
 
+const PasswordInputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const ToggleButton = styled.button`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const Login = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
@@ -154,24 +172,6 @@ const Login = () => {
   const [pwError, setPwError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const PasswordInputWrapper = styled.div`
-    position: relative;
-    width: 100%;
-  `;
-
-  const ToggleButton = styled.button`
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
 
   const validateEmail = (email) => {
     const trimmed = email.trim();
