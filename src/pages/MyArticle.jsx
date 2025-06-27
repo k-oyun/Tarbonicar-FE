@@ -99,7 +99,7 @@ const MyArticle = () => {
   }, [sortType]);
   // 공통 로드 함수: 모바일은 누적, PC는 교체
   const loadArticles = async (targetPage, isReset = false) => {
-    if (isLoading || (isMobile && isLastPage)) return;
+    if (isLoading || (isMobile && isLastPage && targetPage !== 0)) return;
     setIsLoading(true);
     try {
       const res = await getMyArticleListApi(sortType, targetPage, pageSize);
@@ -124,10 +124,11 @@ const MyArticle = () => {
     loadArticles(0, true);
   }, [sortType, isMobile]);
 
-  // PC: 페이지 변경 시 해당 페이지만 로드
   useEffect(() => {
-    loadArticles(page, true);
-  }, [page]);
+    if (!isMobile) {
+      loadArticles(page, true);
+    }
+  }, [page, isMobile]);
 
   // 무한스크롤: 마지막 요소 감지
   const lastItemRef = useCallback(
