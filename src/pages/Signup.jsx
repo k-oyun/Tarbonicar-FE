@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
 import checkIcon from "../assets/imgs/check2.svg";
+import passwordEyeIcon from "../assets/imgs/passwordEye.svg";
+import passwordEyeCloseIcon from "../assets/imgs/passwordEye2.svg";
 import memberApi from "../api/memberApi";
 import { useNavigate } from "react-router-dom";
 import { imageUploadApi } from "../api/imageUploadApi";
@@ -101,6 +103,7 @@ const Input = styled.input`
   box-sizing: border-box;
   padding: 10px;
   font-size: 13px;
+  padding-right: 35px;
   border: 1px solid #ccc;
 `;
 
@@ -119,8 +122,8 @@ const EmailInput = styled.input`
 `;
 
 const CheckButton = styled.button`
-  /* padding: 10px 16px; */
-  padding: ${(props) => (props.$isMobile ? "6px 10px" : "10px 16px")};
+  height: 40px;
+  padding: ${(props) => (props.$isMobile ? "6px 10px" : "0px 16px")};
   font-size: ${(props) => (props.$isMobile ? "12px" : "14px")};
   background-color: #002c5f;
   color: white;
@@ -189,6 +192,35 @@ const SubmitButton = styled.button`
   }
 `;
 
+const PasswordInputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 40px;
+`;
+
+const PasswordInput = styled.input`
+  width: 100%;
+  height: 100%;
+  padding: 10px 35px 10px 10px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+`;
+
+const ToggleButton = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const Signup = () => {
   const isMobile = useMediaQuery({ query: "(max-width:767px)" });
   const fileInputRef = useRef(null);
@@ -205,6 +237,7 @@ const Signup = () => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordsMatch, setPasswordsMatch] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState("");
@@ -367,7 +400,7 @@ const Signup = () => {
       setDialog({
         isOpen: true,
         title: "회원가입이 완료되었습니다.",
-        showCancel: true,
+        showCancel: false,
         isRedButton: false,
         onConfirm: () => {
           setDialog({ isOpen: false });
@@ -440,43 +473,79 @@ const Signup = () => {
               {step === 2 && currentStep === 2 && (
                 <>
                   <InputRow>
-                    <Input
-                      type="password"
-                      value={password}
-                      onChange={handlePasswordChange}
-                      ref={(el) => (inputRefs.current[1] = el)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && passwordValid) {
-                          moveToNextStep(3);
-                        }
-                      }}
-                    />
+                    <PasswordInputWrapper>
+                      <PasswordInput
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={handlePasswordChange}
+                        ref={(el) => (inputRefs.current[1] = el)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && passwordValid) {
+                            moveToNextStep(3);
+                          }
+                        }}
+                      />
+                      <ToggleButton
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        <img
+                          src={
+                            showPassword
+                              ? passwordEyeIcon
+                              : passwordEyeCloseIcon
+                          }
+                          alt="비밀번호 보기 전환"
+                          style={{ width: "16px", height: "16px" }}
+                        />
+                      </ToggleButton>
+                    </PasswordInputWrapper>
                     <CheckButton
                       $isMobile={isMobile}
                       onClick={() => {
                         if (passwordValid) moveToNextStep(3);
                       }}
                     >
-                      확인
+                      다음
                     </CheckButton>
                   </InputRow>
+
                   {passwordError && <ErrorMsg>{passwordError}</ErrorMsg>}
                 </>
               )}
               {step === 3 && currentStep === 3 && (
                 <>
                   <InputRow>
-                    <Input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={handleConfirmPasswordChange}
-                      ref={(el) => (inputRefs.current[2] = el)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && confirmPassword === password) {
-                          moveToNextStep(4);
-                        }
-                      }}
-                    />
+                    <PasswordInputWrapper>
+                      <PasswordInput
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={handleConfirmPasswordChange}
+                        ref={(el) => (inputRefs.current[2] = el)}
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            confirmPassword === password
+                          ) {
+                            moveToNextStep(4);
+                          }
+                        }}
+                      />
+                      <ToggleButton
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        <img
+                          src={
+                            showPassword
+                              ? passwordEyeIcon
+                              : passwordEyeCloseIcon
+                          }
+                          alt="비밀번호 보기 전환"
+                          style={{ width: "16px", height: "16px" }}
+                        />
+                      </ToggleButton>
+                    </PasswordInputWrapper>
                     <CheckButton
                       $isMobile={isMobile}
                       onClick={() => {
@@ -486,6 +555,7 @@ const Signup = () => {
                       다음
                     </CheckButton>
                   </InputRow>
+
                   {!passwordsMatch && confirmPassword && (
                     <ErrorMsg>비밀번호가 일치하지 않습니다.</ErrorMsg>
                   )}
