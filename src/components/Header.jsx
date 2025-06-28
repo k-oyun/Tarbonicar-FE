@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import logoImgDark from "../assets/imgs/logoDark.png";
 import logoImgWhite from "../assets/imgs/logoWhite.png";
@@ -6,7 +6,7 @@ import profileIcon from "../assets/imgs/profileIcon.png";
 import LogoutIcon from "../assets/imgs/LogoutIcon.png";
 import { fadeDown } from "../styles/animation";
 import { useMediaQuery } from "react-responsive";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { memberApi } from "../api/memberApi";
 const HeaderContainer = styled.header`
@@ -126,11 +126,14 @@ const Header = ({
   border,
 }) => {
   const naviagate = useNavigate();
+  const location = useLocation();
   const [nickname, setNickname] = useState("");
   const [userImg, setUserImg] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalConfirm, setIsModalConfirm] = useState(false);
+  const popupRef = useRef(null);
+  const imageRef = useRef(null);
   const { userInfoGet } = memberApi();
   const isMobile = useMediaQuery({
     query: "(max-width:767px)",
@@ -147,7 +150,10 @@ const Header = ({
   };
 
   const onClickMypage = () => {
-    naviagate("/my-page");
+    if (location.pathname === "/my-page") {
+      setIsPopupOpen(false);
+      window.location.reload();
+    } else naviagate("/my-page");
   };
 
   useEffect(() => {
@@ -172,6 +178,25 @@ const Header = ({
       window.location.reload();
     }
   }, [isModalConfirm]);
+
+  useEffect(() => {
+    if (!isPopupOpen) return;
+    function handleClickOutside(event) {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        imageRef.current &&
+        !imageRef.current.contains(event.target)
+      ) {
+        setIsPopupOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isPopupOpen]);
+
   return (
     <>
       <HeaderContainer
@@ -216,6 +241,7 @@ const Header = ({
                 {nickname}님, 환영합니다.
               </HeaderText>
               <UserImageContainer
+                ref={imageRef}
                 $ismobile={isMobile}
                 $image={userImg ? userImg : profileIcon}
                 onClick={handlePopup}
@@ -225,7 +251,7 @@ const Header = ({
         </UserInfoContainer>
       </HeaderContainer>
       {isPopupOpen ? (
-        <Popup $ismobile={isMobile}>
+        <Popup ref={popupRef} $ismobile={isMobile}>
           <PopupBtn onClick={onClickMypage}>
             <PopupImg src={profileIcon} $width="20px" $mr="5px" />
             마이페이지
