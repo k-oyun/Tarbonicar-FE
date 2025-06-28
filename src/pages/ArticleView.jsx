@@ -18,6 +18,7 @@ import {commentApi} from "../api/commentApi.js";
 import {articleApi} from "../api/articleApi.js";
 import {Pagination} from "@mui/material";
 import memberApi from "../api/memberApi.js";
+import {useNavigate} from "react-router-dom";
 
 const GlobalStyle = createGlobalStyle`
     @import url('https://fonts.googleapis.com/css2?family=Oswald&family=Lato:wght@300;400;700&display=swap');
@@ -138,7 +139,7 @@ const GoToLoginBox = styled.div`
 
 const ArticleView = () => {
 
-
+    const navigate = useNavigate();
     const isMobile = useMediaQuery({ query: "(max-width:767px)" });
     // 로그인 상태 확인
     const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
@@ -309,11 +310,8 @@ const ArticleView = () => {
     const handleArticleDelete = async () => {
         try {
             const res = await deleteArticleApi(article.id);
-            if (res.data.success) {
-                window.location.href = "../article-list";
-            } else {
-                alert(res.data.message || "게시글 삭제 실패");
-            }
+            if (res.data.success) navigate(-1);
+            else alert(res.data.message || "게시글 삭제 실패");
         } catch (e) {
             console.error(e);
             alert("게시글 삭제 중 오류 발생");
