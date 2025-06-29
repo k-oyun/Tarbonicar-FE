@@ -46,6 +46,7 @@ const Content = styled.div`
     margin-bottom: 4px;
     padding: 5px 0;
     word-break: break-all;
+    white-space: pre-line;
 `;
 
 const Actions = styled.div`
