@@ -8,21 +8,20 @@ const SelectBoxContainer = styled.div`
   font-size: 13px;
 `;
 const SelectBoxButton = styled.button`
-  width: 110px;
+  width: ${props => props.$width};
   height: 45px;
   position: relative;
   display: flex;
   align-items: center;
   background-color: transparent;
   border: ${(props) =>
-    props.$isSelected === "" ? "1px solid #d9d9d9" : "1px solid #002c5f"};
+      props.$isSelected === "" ? "1px solid #d9d9d9" : "1px solid #002c5f"};
   border-radius: 10px;
   color: ${(props) => (props.$isSelected === "" ? "#d9d9d9" : "#002c5f")};
   text-align: start;
-  cursor: pointer;
+  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
   padding-left: 20px;
   font-size: 13px;
-  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
 `;
 
 const SelectBoxList = styled.div`
@@ -36,11 +35,11 @@ const SelectBoxList = styled.div`
   position: absolute;
   top: 37px;
   border-bottom: ${(props) =>
-    !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
+      !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
   border-left: ${(props) =>
-    !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
+      !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
   border-right: ${(props) =>
-    !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
+      !props.$isSelected ? "1px solid #d9d9d9" : "1px solid #002c5f"};
   box-sizing: border-box;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -60,22 +59,22 @@ const SelectBoxItem = styled.li`
 `;
 
 const SelectBox = ({
-  options,
-  placeholder,
-  value,
-  onSelect,
-  isSelected,
-  onClick,
-  width,
-  disabled,
-}) => {
+                     options,
+                     placeholder,
+                     value,
+                     onSelect,
+                     isSelected,
+                     onClick,
+                     width,
+                     disabled,
+                   }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectBoxRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        selectBoxRef.current &&
-        !selectBoxRef.current.contains(event.target)
+          selectBoxRef.current &&
+          !selectBoxRef.current.contains(event.target)
       ) {
         setIsOpen(false);
       }
@@ -90,34 +89,35 @@ const SelectBox = ({
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
-    <SelectBoxContainer ref={selectBoxRef}>
-      <SelectBoxButton
-        onClick={(e) => {
-          if (disabled) return;
-          setIsOpen((prev) => !prev);
-          onClick?.(e);
-        }}
-        $isSelected={isSelected}
-        $disabled={disabled}
-      >
-        {selectedLabel || placeholder}
-      </SelectBoxButton>
-      {isOpen && !disabled ? (
-        <SelectBoxList $isOpen={isOpen} $isSelected={isSelected} $width={width}>
-          {options.map((opt) => (
-            <SelectBoxItem
-              key={opt.value}
-              onClick={() => {
-                onSelect(opt.value);
-                setIsOpen(false);
-              }}
-            >
-              {opt.label}
-            </SelectBoxItem>
-          ))}
-        </SelectBoxList>
-      ) : null}
-    </SelectBoxContainer>
+      <SelectBoxContainer ref={selectBoxRef}>
+        <SelectBoxButton
+            onClick={(e) => {
+              if (disabled) return;
+              setIsOpen((prev) => !prev);
+              onClick?.(e);
+            }}
+            $isSelected={isSelected}
+            $disabled={disabled}
+            $width={width}
+        >
+          {selectedLabel || placeholder}
+        </SelectBoxButton>
+        {isOpen && !disabled && (
+            <SelectBoxList $isOpen={isOpen} $isSelected={isSelected} $width={width}>
+              {options.map((opt) => (
+                  <SelectBoxItem
+                      key={opt.value}
+                      onClick={() => {
+                        onSelect(opt.value);
+                        setIsOpen(false);
+                      }}
+                  >
+                    {opt.label}
+                  </SelectBoxItem>
+              ))}
+            </SelectBoxList>
+        )}
+      </SelectBoxContainer>
   );
 };
 

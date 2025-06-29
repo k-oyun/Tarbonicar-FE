@@ -114,7 +114,7 @@ export default function ArticleWrite() {
     const headerHeight  = isMobile ? HEADER_MOBILE : HEADER_DESKTOP;
     const wrapperTop    = headerHeight + 20;
     const toolbarOffset = headerHeight;
-    const selectWidth   = isMobile ? "100px" : "110px";  // 수정: PC/모바일에 따라 width 지정
+    const selectWidth   = isMobile ? "89px" : "110px";  // 수정: PC/모바일에 따라 width 지정
 
     // 에디터 폰트 적용
     useEffect(()=>{
