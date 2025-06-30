@@ -310,7 +310,7 @@ const ArticleView = () => {
     const handleArticleDelete = async () => {
         try {
             const res = await deleteArticleApi(article.id);
-            if (res.data.success) navigate(-1);
+            if (res.data.success) navigate("/article-list");
             else alert(res.data.message || "게시글 삭제 실패");
         } catch (e) {
             console.error(e);
