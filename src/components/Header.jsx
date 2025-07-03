@@ -46,7 +46,7 @@ const UserImageContainer = styled.div`
   background-color: grey;
   margin-right: 25px;
   margin-left: 15px;
-  background-image: ${(props) => `url(${props.$image}?rand=${Math.random()})`};
+  background-image: ${(props) => `url(${props.$image})`};
   background-position: center;
   background-size: cover;
   box-shadow: inset 0 0 0 1px black;
@@ -243,7 +243,7 @@ const Header = ({
               <UserImageContainer
                 ref={imageRef}
                 $ismobile={isMobile}
-                $image={userImg ? userImg.trim() : profileIcon}
+                $image={userImg ? userImg : profileIcon}
                 onClick={handlePopup}
               />
             </>
