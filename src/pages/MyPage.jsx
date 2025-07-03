@@ -238,7 +238,7 @@ const PasswordInputFieldWrapper = styled.div`
   display: inline-block;
   width: 40%;
   margin-top: 10px;
-  margin-right: ${(props) => (props.$withRightMargin ? "32px" : "")};
+  margin-right: ${(props) => (props.$withRightMargin ? "28px" : "")};
 `;
 
 const InputField = styled.input`
@@ -247,7 +247,6 @@ const InputField = styled.input`
   margin: 10px 0;
   font-size: 14px;
   border: 2px solid #ddd;
-  margin-right: ${(props) => (props.$withRightMargin ? "32px" : "")};
 `;
 
 const PasswordInputField = styled.input`
@@ -464,7 +463,9 @@ const MyPage = () => {
       setSelectedFile(null); // 상태 초기화
     } catch (e) {
       console.log(e);
-      setInfoModalMessage("프로필 이미지 변경 중 오류가 발생했습니다.");
+      setInfoModalMessage(
+        "해당 이미지는 사용할 수 없습니다. 다른 이미지를 사용해주세요."
+      );
       setInfoReload(false);
     }
     setInfoModalOpen(true);
