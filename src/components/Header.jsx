@@ -243,7 +243,7 @@ const Header = ({
               <UserImageContainer
                 ref={imageRef}
                 $ismobile={isMobile}
-                $image={userImg ? userImg : profileIcon}
+                $image={userImg ? userImg.trim() : profileIcon}
                 onClick={handlePopup}
               />
             </>
