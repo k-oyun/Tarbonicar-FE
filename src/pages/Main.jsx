@@ -15,7 +15,8 @@ const MainContainer = styled.div`
   width: 100%;
   height: 100vh;
   overflow-y: scroll;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: ${(props) =>
+    props.$selectedType === "" ? "y mandatory" : ""};
   scroll-behavior: smooth;
 `;
 
@@ -55,7 +56,7 @@ const ReviewContainer = styled.div`
 `;
 
 const CarImg = styled.img`
-  width: ${(props) => (props.$ismobile ? "350px" : "700px")};
+  width: ${(props) => (props.$ismobile ? "85%" : "35%")};
 `;
 
 const TextContainer = styled.div`
@@ -261,7 +262,7 @@ const Main = () => {
         logoColor={"white"}
         border={false}
       />
-      <MainContainer>
+      <MainContainer $selectedType={selectedType}>
         <VideoContainer>
           <Video
             src={video1}
