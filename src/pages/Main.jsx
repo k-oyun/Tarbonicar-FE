@@ -281,7 +281,7 @@ const Main = () => {
           </TextContainer>
           <TextContainer $mt="15px" $ismobile={isMobile}>
             <SubText $ismobile={isMobile}>
-              현대자통차에 특화된 프리미엄 차량 커뮤니티 플랫폼
+              현대자동차에 특화된 프리미엄 차량 커뮤니티 플랫폼
             </SubText>
           </TextContainer>
           <DescContainer $ismobile={isMobile} $isBtnPressed={isBtnPressed}>
