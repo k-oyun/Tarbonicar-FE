@@ -20,6 +20,8 @@ const Container = styled.div`
   margin: 0 auto;
   font-family: "Noto Sans KR", sans-serif;
   color: #333;
+  box-sizing: border-box;
+  overflow-x: hidden;
 `;
 
 const BreadCrumb = styled.div`
@@ -44,13 +46,13 @@ const TitleSection = styled.section`
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
+  font-size: ${(props) => (props.$ismobile ? "22px" : "24px")};
   font-weight: 700;
   margin-bottom: 10px;
 `;
 
 const Subtitle = styled.p`
-  font-size: 12px;
+  font-size: ${(props) => (props.$ismobile ? "11px" : "12px")};
   color: #999;
   letter-spacing: 4px;
 `;
@@ -105,7 +107,7 @@ const MainSection = styled.div`
   min-height: 400px;
   display: flex;
   flex-direction: column;
-  width: 90%;
+  width: 95%;
 `;
 
 const StatsBar = styled.div`
@@ -120,26 +122,30 @@ const StatsBar = styled.div`
 
 const StatsItem = styled.div`
   cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
-  font-size: ${(props) => (props.$ismobile ? "13px" : "14px")};
+  font-size: ${(props) => (props.$ismobile ? "12px" : "14px")};
   font-weight: 600;
   text-align: left;
   display: flex;
   flex: 1;
   justify-content: space-between;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: ${(props) => (props.$ismobile ? "12px" : "20px")};
+  padding-right: ${(props) => (props.$ismobile ? "12px" : "20px")};
+  align-items: center;
 `;
 
 const MyArticles = styled.div`
-  font-size: ${(props) => (props.$ismobile ? "14px" : "15px")};
+  font-size: ${(props) => (props.$ismobile ? "13px" : "15px")};
+  align-items: center;
 `;
 
 const MyLikes = styled.div`
-  font-size: ${(props) => (props.$ismobile ? "14px" : "15px")};
+  font-size: ${(props) => (props.$ismobile ? "13px" : "15px")};
+  align-items: center;
 `;
 
 const MyInquiries = styled.div`
-  font-size: ${(props) => (props.$ismobile ? "14px" : "15px")};
+  font-size: ${(props) => (props.$ismobile ? "13px" : "15px")};
+  align-items: center;
 `;
 
 const ContentWrapper = styled.div`
@@ -188,7 +194,7 @@ const PlusIcon = styled.div`
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 20px;
+  line-height: 27px;
   font-size: 20px;
   font-weight: bold;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
@@ -236,15 +242,15 @@ const InputLabel = styled.label`
 const PasswordInputFieldWrapper = styled.div`
   position: relative;
   display: inline-block;
-  width: 40%;
+  width: ${(props) => (props.$ismobile ? "60%" : "40%")};
   margin-top: 10px;
   margin-right: ${(props) => (props.$withRightMargin ? "28px" : "")};
 `;
 
 const InputField = styled.input`
   padding: 5px;
-  width: 40%;
-  margin: 10px 0;
+  width: ${(props) => (props.$ismobile ? "60%" : "40%")};
+  margin: 30px 0;
   font-size: 14px;
   border: 2px solid #ddd;
 `;
@@ -569,7 +575,7 @@ const MyPage = () => {
               <BorderLine />
               <InputRow>
                 <InputLabel htmlFor="password">비밀번호: </InputLabel>
-                <PasswordInputFieldWrapper>
+                <PasswordInputFieldWrapper $ismobile={isMobile}>
                   <PasswordInputField
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -586,7 +592,10 @@ const MyPage = () => {
                 <InputLabel htmlFor="confirmPassword">
                   비밀번호 확인:{" "}
                 </InputLabel>
-                <PasswordInputFieldWrapper $withRightMargin>
+                <PasswordInputFieldWrapper
+                  $withRightMargin
+                  $ismobile={isMobile}
+                >
                   <PasswordInputField
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
@@ -623,8 +632,8 @@ const MyPage = () => {
           홈 &gt; <a href="/my-page">마이페이지</a>
         </BreadCrumb>
         <TitleSection>
-          <Title>마이페이지</Title>
-          <Subtitle>
+          <Title $ismobile={isMobile}>마이페이지</Title>
+          <Subtitle $ismobile={isMobile}>
             타보니까의 등록된 회원님의 정보를 수정할 수 있습니다.
           </Subtitle>
         </TitleSection>

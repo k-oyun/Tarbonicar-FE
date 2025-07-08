@@ -35,13 +35,13 @@ const TitleSection = styled.section`
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
+  font-size: ${(props) => (props.$ismobile ? "22px" : "24px")};
   font-weight: 700;
   margin-bottom: 10px;
 `;
 
 const Subtitle = styled.p`
-  font-size: 12px;
+  font-size: ${(props) => (props.$ismobile ? "11px" : "12px")};
   color: #999;
   letter-spacing: 4px;
 `;
@@ -158,8 +158,10 @@ const MyArticle = () => {
       </BreadCrumb>
 
       <TitleSection>
-        <Title>내가 작성한 글</Title>
-        <Subtitle>회원님이 등록한 게시글 목록입니다.</Subtitle>
+        <Title $ismobile={isMobile}>내가 작성한 글</Title>
+        <Subtitle $ismobile={isMobile}>
+          회원님이 등록한 게시글 목록입니다.
+        </Subtitle>
       </TitleSection>
 
       <Content>
