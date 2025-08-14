@@ -32,24 +32,25 @@
 </div>
 <br />
 
+
 # 📱 실행 화면
-| ![HOME](https://github.com/user-attachments/assets/174ee8ce-c96f-4fb4-86e3-851719467732) | ![MAIN](https://github.com/user-attachments/assets/2eaf2cc8-70d7-4df3-bd4c-5f0b04b7885f) |
+| ![REGISTER](https://github.com/user-attachments/assets/e0a7596b-1839-4a3c-8aa6-bcd2d92f1a39) | ![LOGIN](https://github.com/user-attachments/assets/1c8599b8-ff3b-442b-b959-4b3df4a71333) |
 |:----------:|:----------:|
-|  홈 화면 | 메인 화면 |
-| ![REGISTER1](https://github.com/user-attachments/assets/cf62121a-348b-47b4-bb41-0d379ad28d5d) | ![REGISTER2](https://github.com/user-attachments/assets/522383c1-9bd9-4816-baa1-9949908805c3) |
-| 회원가입 화면1 | 회원가입 화면2|
-| ![LOGIN](https://github.com/user-attachments/assets/87f6f7e7-7907-49eb-979c-b4faa7a27454) | ![POST](https://github.com/user-attachments/assets/4714da48-5418-4410-8955-356549550284) |
-| 로그인 화면 | 게시글 리스트 조회 화면 |
-| ![POST1](https://github.com/user-attachments/assets/d9c47591-1494-4239-b3dc-85f5896569a2) | ![POST2](https://github.com/user-attachments/assets/79aa76c6-9513-449e-bae9-fcd0539aa8d2) |
-| 게시글 조회 화면 | 게시글 작성 화면 |
-| ![MYPAGE1](https://github.com/user-attachments/assets/fd5f6928-4271-43dc-ab1d-46b67c0717ea) | ![MYPAGE2](https://github.com/user-attachments/assets/4ac55cd5-5fad-494e-8aba-d3f729ab7907) |
-| 그룹 정보 화면 | 그룹 정보 모달 |
-| ![MYPAGE2](https://github.com/user-attachments/assets/fd5f6928-4271-43dc-ab1d-46b67c0717ea) | 
-| 나의 그룹 화면 |
-
-
-
-
+|  회원가입 화면 | 로그인 화면 |
+| ![HOME](https://github.com/user-attachments/assets/edb40648-d877-402a-9c0f-b7c884ab3a8a) | ![HOME2](https://github.com/user-attachments/assets/a05a1266-4e0a-4846-9c9c-51f3bcee1db1) |
+| 홈 화면1 | 홈 화면2 |
+| ![HOME SEARCH 1](https://github.com/user-attachments/assets/30c74d6c-701c-4910-accb-515c01499b8e) | ![HOME SEARCH 2](https://github.com/user-attachments/assets/04677a3b-9893-475c-a975-851ecbd99151) |
+| 차량 검색 화면1 | 차량 검색 화면2 |
+| ![LIST1](https://github.com/user-attachments/assets/d4c75d23-e2bc-4c9c-83f5-0a3c80a75603) | ![LIST2](https://github.com/user-attachments/assets/38a1eab5-328b-4f62-899b-d31e909c6b75) |
+| 게시글 조회 화면 | 게시글 필터 적용 화면 |
+| ![POST-DETAIL1](https://github.com/user-attachments/assets/586b92a5-b598-40ed-a5b2-f465aa9e196e) | ![POST-DETAIL2](https://github.com/user-attachments/assets/69ca4f31-e4e9-40be-8d3a-c2bd20d12016) |
+| 게시글 상세 화면1 | 게시글 상세 화면2 |
+| ![POST-DETAIL3](https://github.com/user-attachments/assets/526cb0ab-5938-471d-833d-66da07a605ac) | ![POST1](https://github.com/user-attachments/assets/10ba4a44-17da-4a6f-becc-e87548641736) |
+| 게시글 상세 화면3 | 게시글 작성 화면1 |
+| ![POST2](https://github.com/user-attachments/assets/72e95740-d07f-445b-8967-8a39fd290d98) | ![MYPAGE1](https://github.com/user-attachments/assets/9b7d3bc8-2eeb-4867-bcf7-97d039b9c685) | 
+| 게시글 작성 화면2 | 마이페이지 화면1 |
+| ![MYPAGE2](https://github.com/user-attachments/assets/ff50ef25-7b64-4bea-b0a0-f7e5f72a30e0) | ![MYPAGE3](https://github.com/user-attachments/assets/e95704cd-31b9-416c-874f-4dfb87b31078) | 
+| 마이페이지 화면2 | 마이페이지 화면3 |
 
 
 <br />
