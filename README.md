@@ -40,7 +40,7 @@
 | ![HOME](https://github.com/user-attachments/assets/edb40648-d877-402a-9c0f-b7c884ab3a8a) | ![HOME2](https://github.com/user-attachments/assets/a05a1266-4e0a-4846-9c9c-51f3bcee1db1) |
 | 홈 화면1 | 홈 화면2 |
 | ![HOME SEARCH 1](https://github.com/user-attachments/assets/30c74d6c-701c-4910-accb-515c01499b8e) | ![HOME SEARCH 2](https://github.com/user-attachments/assets/04677a3b-9893-475c-a975-851ecbd99151) |
-| 차량 검색 화면1 | 차량 검색 화면2 |
+| 홈 화면 (차량 검색)1 | 홈 화면 (차량 검색)2 |
 | ![LIST1](https://github.com/user-attachments/assets/d4c75d23-e2bc-4c9c-83f5-0a3c80a75603) | ![LIST2](https://github.com/user-attachments/assets/38a1eab5-328b-4f62-899b-d31e909c6b75) |
 | 게시글 조회 화면 | 게시글 필터 적용 화면 |
 | ![POST-DETAIL1](https://github.com/user-attachments/assets/586b92a5-b598-40ed-a5b2-f465aa9e196e) | ![POST-DETAIL2](https://github.com/user-attachments/assets/69ca4f31-e4e9-40be-8d3a-c2bd20d12016) |
